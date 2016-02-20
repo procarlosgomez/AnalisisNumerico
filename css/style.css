@@ -1,14 +1,7 @@
-/*--
-Author: W3layouts
-Author URL: http://w3layouts.com
-License: Creative Commons Attribution 3.0 Unported
-License URL: http://creativecommons.org/licenses/by/3.0/
---*/
 html, body{
   	font-family: 'Roboto', sans-serif;
     font-size: 100%;
-  	 background: #FFf;
-  	 
+  	background: #FFf;
 }
 body a{
 	transition:0.5s all;
@@ -18,16 +11,17 @@ body a{
 	-ms-transition:0.5s all;
 }
 .bg{
-	background:url(../images/bg.jpg) no-repeat 0px 0px;
+	background:url(../images/nasa.jpeg) no-repeat 0px 0px;
 	background-size:cover;
 }
 /*-----start-header----*/
 .header{
+	/*background-color: red;*/
 	background:rgba(117, 196, 165, 0.6);
 }
 .logo{
 	float: left;
-	background: #2DA88D;
+	
 	padding: 0.5em 2em;
 }
 .logo a{
