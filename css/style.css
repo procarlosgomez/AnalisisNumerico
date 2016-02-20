@@ -21,7 +21,6 @@ body a{
 }
 .logo{
 	float: left;
-	
 	padding: 0.5em 2em;
 }
 .logo a{
@@ -35,6 +34,10 @@ body a{
 .logo320{
 	display:none;
 }
+
+/*---Footer---*/
+
+
 /*----navbar-nav----*/
 .top-header{
 }
