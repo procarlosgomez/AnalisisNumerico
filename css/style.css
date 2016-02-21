@@ -1,7 +1,7 @@
 html, body{
   	font-family: 'Roboto', sans-serif;
     font-size: 100%;
-  	background: #FFf;
+  	background: white;
 }
 body a{
 	transition:0.5s all;
@@ -16,8 +16,9 @@ body a{
 }
 /*-----start-header----*/
 .header{
-	/*background-color: red;*/
-	background:rgba(117, 196, 165, 0.6);
+	background-color: rgba(39, 133, 255, 0.3);
+	background: rgba(39, 133, 255, 0.3);
+	color: rgba(39, 133, 255, 0.3);
 }
 .logo{
 	float: left;
