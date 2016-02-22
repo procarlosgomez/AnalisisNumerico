@@ -2,39 +2,26 @@
 <html>
 	<head>
 		<title>Analisis Numerico</title>
-		<link href="css/bootstrap.css" rel='stylesheet' type='text/css' />
-		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-		<script src="js/jquery.min.js"></script>
-		 <!-- Custom Theme files -->
-		<link href="css/style.css" rel='stylesheet' type='text/css' />
-   		 <!-- Custom Theme files -->
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-		</script>
-		<!---- animated-css ---->
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900' rel='stylesheet' type='text/css'>
+		<link href="css/bootstrap.css" rel='stylesheet' type='text/css' />
+		<link href="css/style.css" rel='stylesheet' type='text/css' />
 		<link href="css/animate.css" rel="stylesheet" type="text/css" media="all">
-		<script type="text/javascript" src="js/jquery.corner.js"></script> 
+
+		<script src="js/jquery.min.js"></script>
+		<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+
+		<!---- animated-css ---->
+
+		<script type="text/javascript" src="js/jquery.corner.js"></script>
 		<script src="js/wow.min.js"></script>
 		<script>
-		 new WOW().init();
+			new WOW().init();
 		</script>
 		<!---- animated-css ---->
 		<!---- start-smoth-scrolling---->
 		<script type="text/javascript" src="js/move-top.js"></script>
 		<script type="text/javascript" src="js/easing.js"></script>
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$(".scroll").click(function(event){		
-					event.preventDefault();
-					$('html,body').animate({scrollTop:$(this.hash).offset().top},1000);
-				});
-			});
-		</script>
-		 <!---- start-smoth-scrolling---->
-		<!----webfonts--->
-		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900' rel='stylesheet' type='text/css'>
-		<!---//webfonts--->
-		<!----start-top-nav-script---->
 		<script>
 			$(function() {
 				var pull 		= $('#pull');
@@ -55,24 +42,25 @@
 		<!----//End-top-nav-script---->
 	</head>
 	<body>
-		<div class="bg">
+		<div class="bg"></div>
 		<!----- start-header---->
 		<div class="container">
 			<div id="home" class="header wow bounceInDown" data-wow-delay="0.4s">
 					<div class="top-header">
 						<div class="logo">
-							
+
 							<a href="index.html"><img width="50" height="50" src="images\LogoUnitec.png" ></a>
 						</div>
 						<!----start-top-nav---->
 						 <nav class="top-nav">
 							<ul class="top-nav">
 								<li><a href="#" class="scroll">Analisis Numerico</a></li>
-								<li><a href="#" class="scroll">portfolio</a></li>
-								<li class="page-scroll"><a href="#contact" class="scroll">contact</a></li>
-								<li class="active-join" class="page-scroll"><a href="#team" class="scroll">join us</a></li>
+								<!--<li><a href="#" class="scroll">portfolio</a></li>
+								<li class="page-scroll"><a href="#contact" class="scroll">contact</a></li>-->
+								<li></li><li></li>
+								<li class="active-join" class="page-scroll"><a href="https://github.com/saidmoya12/analisisnumerico" class="scroll">Ver en GITHUB</a></li>
 							</ul>
-							
+
 						</nav>
 						<div class="clearfix"> </div>
 					</div>
@@ -88,7 +76,8 @@
 						<span class="top-icon1"> </span>
 						<h3>Graficas De Funciones</h3>
 					</div>
-					<div class="banner-grid banner-grid-active text-center">
+					<!--<div class="banner-grid banner-grid-active text-center">-->
+					<div class="banner-grid text-center">
 						<span class="top-icon2"> </span>
 						<h3>Minimos De Funciones</h3>
 					</div>
@@ -108,8 +97,6 @@
 				</div>
 				</div>
 			</div>
-		</div>
 
 	</body>
 </html>
-

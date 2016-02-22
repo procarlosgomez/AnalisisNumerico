@@ -1,7 +1,6 @@
 html, body{
   	font-family: 'Roboto', sans-serif;
     font-size: 100%;
-  	background: white;
 }
 body a{
 	transition:0.5s all;
@@ -11,7 +10,11 @@ body a{
 	-ms-transition:0.5s all;
 }
 .bg{
+	position: absolute;
+	top: 0; bottom: 0; left: 0; right: 0;
 	background:url(../images/nasa.jpeg) no-repeat 0px 0px;
+	z-index: -1;
+	opacity: 0.5;
 	background-size:cover;
 }
 /*-----start-header----*/
@@ -104,7 +107,7 @@ nav a#pull {
 }
 /*Styles for screen 600px and lower*/
 @media screen and (max-width: 768px) {
-	nav { 
+	nav {
   		height: auto;
   		float:none;
   	}
@@ -179,7 +182,7 @@ nav a#pull {
 }
 /*---- banner-info ----*/
 .banner-info{
-	
+
 }
 .banner-info h1{
 	color: #FFF;
@@ -204,10 +207,11 @@ nav a#pull {
 /*---- banner-grids ----*/
 .banner-grid{
 	background:rgba(114, 189, 163, 0.72);
+	display: block;
+	cursor: pointer;
 	float:left;
 	width:20%;
 	padding:2em 2em 2.3em 2em;
-	float:left;
 	transition:0.5s all;
 	-webkit-transition:0.5s all;
 	-moz-transition:0.5s all;
@@ -247,7 +251,7 @@ nav a#pull {
 }
 /*---- top-grids -----*/
 .top-grid{
-	
+
 }
 .top-grid span{
 	width:87px;
@@ -283,7 +287,7 @@ nav a#pull {
 	padding: 0.6em 0 0 0;
 }
 .top-grid h3 a{
-	color:#FF6138;	
+	color:#FF6138;
 }
 .top-grid h3 a:hover{
 	text-decoration:none;
@@ -552,7 +556,7 @@ li.blog-art-info-stags-left span{
 		float:left;
 		overflow:hidden;
 		margin:0;
-	}	
+	}
 	.portfolio-wrapper {
 		overflow:hidden;
 		position: relative !important;
@@ -586,7 +590,7 @@ li.blog-art-info-stags-left span{
 			z-index:500;
 			padding:5px 8px;
 		}
-			
+
 			.portfolio .text-category {
 				display:block;
 				font-size:9px;
@@ -1164,7 +1168,7 @@ a.contact-me:hover{
 		padding: 0.5em 1em;
 	}
 	.banner-info h1 span {
-		font-size: 0.35em;	
+		font-size: 0.35em;
 	}
 	.banner-info h1 label {
 		font-size: 0.455em;
@@ -1463,4 +1467,3 @@ a.contact-me:hover{
 		padding: 0.8em 0;
 	}
 }
-
