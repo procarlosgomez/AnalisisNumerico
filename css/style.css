@@ -1,12 +1,25 @@
 html, body{
+	margin: 0;
   	font-family: 'Roboto', sans-serif;
+}
+#container #header{
+	height: 80px;
+	padding: 20px;
+	padding-left: 40px;
+	width: 100%;
+	border-bottom: 10px solid #004C80;
+	background-color: #5baadf;
+}
+
+#container #header img{
+	height: 100%;
 }
 
 #container #menu{
 	position: absolute;
 	left: 50%;
-	bottom: 150px;
-	transform: translateX(-50%);
+	top: 50%;
+	transform: translateX(-50%) translateY(-50%);
 }
 
 #container #menu a{
@@ -26,6 +39,9 @@ html, body{
 	cursor: pointer;
 }
 
+#container #footer{
+	
+}
 
 /*
 html, body{
