@@ -3,6 +3,7 @@
 <head>
 	<title>math.js | plot</title>
 	<script src="js/math.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
 	<!-- load http://maurizzzio.github.io/function-plot/ -->
 	<script src="js/d3.min.js"></script>
@@ -15,6 +16,11 @@
 		transform: translateX(-50%);
 		position: relative;
 	}
+	#plot_wrapper #plot{
+		text-align: center;
+	}
+	
+	
 	input[type=text] {
 	  width: 300px;
 	}
@@ -28,6 +34,12 @@
 	}
 	form {
 	  margin: 20px 0;
+	}
+	
+	@media (max-width: 600px) {
+		#plot_wrapper .function-plot{
+			max-width: 300px;
+		}
 	}
 	</style>
 </head>
@@ -61,14 +73,17 @@
 <script>
   function draw() {
     try {
-		functionPlot({
-		target: '#plot',
-		data: [{
-		fn: document.getElementById('eq').value,
-			sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
-			graphType: 'polyline'
-		}]
+		var instance = functionPlot({
+			target: '#plot',
+			data: [{
+			fn: document.getElementById('eq').value,
+				sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
+				graphType: 'polyline'
+			}]
 		});
+		var xDomain = [-10, 10]
+		var yDomain = [-1.897, 1.897]
+		instance.programmaticZoom(xDomain, yDomain)
     }
     catch (err) {
       console.log(err);
