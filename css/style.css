@@ -22,7 +22,7 @@ html, body{
 }
 
 #container #menu{
-	
+	text-align: -webkit-center;
 }
 
 #container #menu a{

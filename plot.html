@@ -9,6 +9,12 @@
 	<script src="js/function-plot.js"></script>
 	<link href="css/style.css" rel='stylesheet' type='text/css'>
 	<style>
+	#plot_wrapper{
+		display: inline-block;
+		left: 50%;
+		transform: translateX(-50%);
+		position: relative;
+	}
 	input[type=text] {
 	  width: 300px;
 	}
@@ -30,21 +36,28 @@
 		<div id="bg"></div>
 		<div id="header">
 			<img src="images\LogoUnitec.png"/>
+		</div>
+		<div id="plot_wrapper">
+			<form id="form">
+				<label for="eq">Ingrese la ecuación a graficar:</label>
+				<input type="text" id="eq" value="sin(x)" />
+				<input type="submit" value="Graficar" />
+				<input type="button" id="volver" value="Volver">
+			</form>
+
+			<div id="plot"></div>
+
+			<p>
+				Plot library: <a href="https://github.com/maurizzzio/function-plot">https://github.com/maurizzzio/function-plot</a>
+			</p>
+		</div>
+
+		<div id="footer">
+			<div id="footer-content">
+			
+			</div>
+		</div>
 	</div>
-
-<form id="form">
-	<label for="eq">Ingrese la ecuación a graficar:</label>
-	<input type="text" id="eq" value="sin(x)" />
-	<input type="submit" value="Graficar" />
-	<input type="button" id="volver" value="Volver">
-</form>
-
-<div id="plot"></div>
-
-<p>
-	Plot library: <a href="https://github.com/maurizzzio/function-plot">https://github.com/maurizzzio/function-plot</a>
-</p>
-
 <script>
   function draw() {
     try {
@@ -73,13 +86,5 @@
 	location.href = "index.html";
   };
 </script>
-
-	<div id="footer">
-		<div id="footer-content">
-		
-		</div>
-	</div>
-
-</div>
 </body>
 </html>
