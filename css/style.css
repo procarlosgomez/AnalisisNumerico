@@ -29,6 +29,9 @@ html, body{
 	color: #670080;
     font-weight: bold;
 }
+#container #header a img{
+	height: calc(100% - 15px);
+}
 
 
 #container #menu{
@@ -102,6 +105,14 @@ html, body{
 }
 
 @media (max-width: 500px) {
+	#container #header{
+		height: 40px;
+		padding: 30px;
+		padding-left: 20px;
+	}
+	#container #header a{
+		font-size: 14px;
+	}
 	#container{
 		min-height: 750px;
 	}
