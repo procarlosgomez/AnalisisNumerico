@@ -23,9 +23,10 @@ html, body{
 
 #container #menu{
 	position: absolute;
-	bottom: 80px;
 	text-align: center;
 	width: 100%;
+	top: 50%;
+	transform: translateY(-50%);
 }
 
 #container #menu a{
@@ -55,12 +56,31 @@ html, body{
 }
 
 #container #footer-content{
-	padding: 40px;
+	padding: 10px;
+	padding-left: 40px;
 	background-color: #252525;
+}	
+
+#container #footer-content h3{
+	color: #888;
+	display: inline-block;
+	margin-left: 20px;
+	font-size: 16px;
+}
+#container #footer-content h3 div{
+	font-size: 12px;
 }
 
-
 @media (max-width: 600px) {
+	#container{
+		min-height: 650px;
+	}
+	#container #menu{
+		bottom: 90px;
+	}
+}
+
+@media (max-width: 500px) {
 	#container{
 		min-height: 700px;
 	}
