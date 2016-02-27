@@ -40,6 +40,7 @@ html, body{
 	background-size: 60px;
 	padding-top: 50px;
 	text-decoration: none;
+	color: #252525;
 }
 
 #container #menu a.selected{
@@ -62,13 +63,13 @@ html, body{
 }	
 
 #container #footer-content h3{
-	color: #888;
+	color: #B5B8B1;
 	display: inline-block;
 	margin-left: 20px;
-	font-size: 16px;
+	font-size: 14px;
 }
 #container #footer-content h3 div{
-	font-size: 12px;
+	font-size: 10px;
 }
 
 @media (max-width: 600px) {
