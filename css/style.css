@@ -23,9 +23,10 @@ html, body{
 
 #container #menu{
 	position: absolute;
-	bottom: 80px;
 	text-align: center;
 	width: 100%;
+	top: 50%;
+	transform: translateY(-50%);
 }
 
 #container #menu a{
@@ -33,13 +34,22 @@ html, body{
 	
 	width: 150px;
 	text-align: center;
-	background-image: url("icons/analytics-chart.svg");
+	
 	background-repeat: no-repeat;
 	background-position: top center;
 	background-size: 60px;
 	padding-top: 50px;
 	text-decoration: none;
 }
+
+#container #menu a#graph{
+	background-image: url("icons/analytics-chart.svg");
+}
+
+#container #menu a#minim{
+	background-image: url("icons/minimos.svg");
+}
+
 
 #container #menu a.selected{
 	cursor: pointer;
@@ -55,12 +65,31 @@ html, body{
 }
 
 #container #footer-content{
-	padding: 40px;
+	padding: 10px;
+	padding-left: 40px;
 	background-color: #252525;
+}	
+
+#container #footer-content h3{
+	color: #A0A0A0;
+	display: inline-block;
+	margin-left: 20px;
+	font-size: 16px;
+}
+#container #footer-content h3 div{
+	font-size: 12px;
 }
 
-
 @media (max-width: 600px) {
+	#container{
+		min-height: 650px;
+	}
+	#container #menu{
+		bottom: 90px;
+	}
+}
+
+@media (max-width: 500px) {
 	#container{
 		min-height: 700px;
 	}
