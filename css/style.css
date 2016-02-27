@@ -68,16 +68,18 @@ html, body{
 	padding: 10px;
 	padding-left: 40px;
 	background-color: #252525;
+	text-align: center;
 }	
 
 #container #footer-content h3{
 	color: #A0A0A0;
 	display: inline-block;
 	margin-left: 20px;
-	font-size: 16px;
+	font-size: 13px;
+	text-align: center;
 }
 #container #footer-content h3 div{
-	font-size: 12px;
+	font-size: 10px;
 }
 
 @media (max-width: 600px) {
