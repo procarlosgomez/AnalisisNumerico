@@ -44,7 +44,6 @@ html, body{
 
 #container #menu a{
 	display: inline-block;
-	
 	width: 150px;
 	text-align: center;
 	color: #252525;
@@ -81,7 +80,6 @@ html, body{
 	padding: 10px;
 	padding-left: 40px;
 	background-color: #252525;
-	text-align: center;
 }	
 
 #container #footer-content h3{
