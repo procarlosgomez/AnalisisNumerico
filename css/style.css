@@ -35,11 +35,11 @@ html, body{
 
 
 #container #menu{
-	position: absolute;
-	text-align: center;
-	width: 100%;
-	top: 50%;
-	transform: translateY(-50%);
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 #container #menu a{
