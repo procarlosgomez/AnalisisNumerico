@@ -27,7 +27,7 @@ html, body{
 	text-decoration: none;
 	text-align: center;
 	color: #670080;
-    font-weight: bold;
+	font-weight: bold;
 }
 #container #header a img{
 	height: calc(100% - 15px);
@@ -39,8 +39,7 @@ html, body{
     text-align: center;
     width: 100%;
     top: 50%;
-    
-	margin: auto 0 auto 0;
+    margin: auto 0;
 }
 
 #container #menu a{
@@ -99,6 +98,7 @@ html, body{
 		min-height: 650px;
 	}
 	#container #menu{
+		top: auto;
 		bottom: 90px;
 	}
 }
