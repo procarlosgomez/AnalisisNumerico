@@ -39,7 +39,8 @@ html, body{
     text-align: center;
     width: 100%;
     top: 50%;
-    transform: translateY(-50%);
+    
+	margin: auto 0 auto 0;
 }
 
 #container #menu a{
