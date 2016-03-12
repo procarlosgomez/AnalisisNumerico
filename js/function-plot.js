@@ -1,3 +1,5 @@
+//@copy http://maurizzzio.github.io/function-plot/
+
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.functionPlot=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var isObject = require('is-object')
 
@@ -29,7 +31,7 @@ module.exports = function (d) {
 }
 
 
-},{"is-object":102}],2:[function(require,module,exports){
+},{"is-object":105}],2:[function(require,module,exports){
 /**
  * Created by mauricio on 3/29/15.
  */
@@ -794,10 +796,7 @@ module.exports = function (options) {
     return this
   }
 
-  Chart.prototype.updateScaleAxes = function () {
-    var xDomain = this.meta.xDomain
-    var yDomain = this.meta.yDomain
-
+  Chart.prototype.initializeAxes = function () {
     var integerFormat = d3.format('s')
     var format = function (scale) {
       return function (d) {
@@ -810,10 +809,55 @@ module.exports = function (options) {
       }
     }
 
-    xScale = this.meta.xScale = d3.scale.linear()
+    function computeYScale (xScale) {
+      // assumes that xScale is a linear scale
+      var xDiff = xScale[1] - xScale[0]
+      return height * xDiff / width
+    }
+
+    options.xAxis = options.xAxis || {}
+    options.xAxis.type = options.xAxis.type || 'linear'
+
+    options.yAxis = options.yAxis || {}
+    options.yAxis.type = options.yAxis.type || 'linear'
+
+    var xDomain = this.meta.xDomain = (function (axis) {
+      if (axis.domain) {
+        return axis.domain
+      }
+      if (axis.type === 'linear') {
+        var xLimit = 12
+        return [-xLimit / 2, xLimit / 2]
+      } else if (axis.type === 'log') {
+        return [1, 10]
+      }
+      throw Error('axis type ' + axis.type + ' unsupported')
+    })(options.xAxis)
+
+    var yDomain = this.meta.yDomain = (function (axis) {
+      if (axis.domain) {
+        return axis.domain
+      }
+      var yLimit = computeYScale(xDomain)
+      if (axis.type === 'linear') {
+        return [-yLimit / 2, yLimit / 2]
+      } else if (axis.type === 'log') {
+        return [1, 10]
+      }
+      throw Error('axis type ' + axis.type + ' unsupported')
+    })(options.yAxis)
+
+    if (xDomain[0] >= xDomain[1]) {
+      throw Error('the pair defining the x-domain is inverted')
+    }
+    if (yDomain[0] >= yDomain[1]) {
+      throw Error('the pair defining the y-domain is inverted')
+    }
+
+    xScale = this.meta.xScale = d3.scale[options.xAxis.type]()
       .domain(xDomain)
       .range([0, width])
-    yScale = this.meta.yScale = d3.scale.linear()
+    yScale = this.meta.yScale = d3.scale[options.yAxis.type]()
       .domain(yDomain)
       .range([height, 0])
     this.meta.xAxis = d3.svg.axis()
@@ -829,11 +873,11 @@ module.exports = function (options) {
   }
 
   Chart.prototype.internalVars = function () {
-
     // measurements and other derived data
     this.meta = {}
 
     margin = this.meta.margin = {left: 30, right: 30, top: 20, bottom: 20}
+    // margin = this.meta.margin = {left: 0, right: 0, top: 20, bottom: 20}
     // if there's a title make the top margin bigger
     if (options.title) {
       this.meta.margin.top = 40
@@ -847,25 +891,7 @@ module.exports = function (options) {
     height = this.meta.height = (options.height || globals.DEFAULT_HEIGHT) -
       margin.top - margin.bottom
 
-    function computeYScale (xScale) {
-      var xDiff = xScale[1] - xScale[0]
-      return height * xDiff / width
-    }
-
-    var xLimit = 12
-    var xDomain = this.meta.xDomain = options.xDomain || [-xLimit / 2, xLimit / 2]
-    var yLimit = computeYScale(xDomain)
-    var yDomain = this.meta.yDomain = options.yDomain || [-yLimit / 2, yLimit / 2]
-
-    if (xDomain[0] >= xDomain[1]) {
-      throw Error('the pair defining the x-domain is inverted')
-    }
-    if (yDomain[0] >= yDomain[1]) {
-      throw Error('the pair defining the y-domain is inverted')
-    }
-
-    // scale/axes
-    this.updateScaleAxes()
+    this.initializeAxes()
   }
 
   Chart.prototype.drawGraphWrapper = function () {
@@ -944,7 +970,7 @@ module.exports = function (options) {
       .x(xScale)
       .y(yScale)
       .on('zoom', function onZoom () {
-        self.emit('all:zoom', xScale, yScale)
+        self.emit('all:zoom', d3.event.translate, d3.event.scale)
       })
 
     // enter
@@ -1014,7 +1040,7 @@ module.exports = function (options) {
 
     xLabel = canvas.selectAll('text.x.axis-label')
       .data(function (d) {
-        return [d.xLabel].filter(Boolean)
+        return [d.xAxis.label].filter(Boolean)
       })
     xLabel.enter()
       .append('text')
@@ -1028,7 +1054,7 @@ module.exports = function (options) {
 
     yLabel = canvas.selectAll('text.y.axis-label')
       .data(function (d) {
-        return [d.yLabel].filter(Boolean)
+        return [d.yAxis.label].filter(Boolean)
       })
     yLabel.enter()
       .append('text')
@@ -1083,24 +1109,28 @@ module.exports = function (options) {
       .attr('class', 'content')
 
     // helper line, x = 0
-    var yOrigin = content.selectAll(':scope > path.y.origin')
+    if (options.xAxis.type === 'linear') {
+      var yOrigin = content.selectAll(':scope > path.y.origin')
       .data([ [[0, yScale.domain()[0]], [0, yScale.domain()[1]]] ])
-    yOrigin.enter()
+      yOrigin.enter()
       .append('path')
       .attr('class', 'y origin')
       .attr('stroke', 'black')
       .attr('opacity', 0.2)
-    yOrigin.attr('d', line)
+      yOrigin.attr('d', line)
+    }
 
     // helper line y = 0
-    var xOrigin = content.selectAll(':scope > path.x.origin')
-      .data([ [[xScale.domain()[0], 0], [xScale.domain()[1], 0]] ])
-    xOrigin.enter()
-      .append('path')
-      .attr('class', 'x origin')
-      .attr('stroke', 'black')
-      .attr('opacity', 0.2)
-    xOrigin.attr('d', line)
+    if (options.yAxis.type === 'linear') {
+      var xOrigin = content.selectAll(':scope > path.x.origin')
+        .data([ [[xScale.domain()[0], 0], [xScale.domain()[1], 0]] ])
+      xOrigin.enter()
+        .append('path')
+        .attr('class', 'x origin')
+        .attr('stroke', 'black')
+        .attr('opacity', 0.2)
+      xOrigin.attr('d', line)
+    }
 
     // annotations
     content
@@ -1138,7 +1168,7 @@ module.exports = function (options) {
     var self = this
 
     // enter
-    this.canvas.enter
+    this.draggable = this.canvas.enter
       .append('rect')
       .attr('class', 'zoom-and-drag')
       .style('fill', 'none')
@@ -1189,8 +1219,8 @@ module.exports = function (options) {
 
   Chart.prototype.syncOptions = function () {
     // update the original options yDomain and xDomain
-    this.options.xDomain = this.meta.xScale.domain()
-    this.options.yDomain = this.meta.yScale.domain()
+    this.options.xAxis.domain = this.meta.xScale.domain()
+    this.options.yAxis.domain = this.meta.yScale.domain()
   }
 
   Chart.prototype.programmaticZoom = function (xDomain, yDomain) {
@@ -1229,20 +1259,24 @@ module.exports = function (options) {
     var instance = this
 
     var events = {
-      mousemove: function (x, y) {
-        instance.tip.move(x, y)
+      mousemove: function (coordinates) {
+        instance.tip.move(coordinates)
       },
+
       mouseover: function () {
         instance.tip.show()
       },
+
       mouseout: function () {
         instance.tip.hide()
       },
-      'zoom:scaleUpdate': function (xOther, yOther) {
+
+      zoom: function (translate, scale) {
         zoomBehavior
-          .x(xScale.domain(xOther.domain()))
-          .y(yScale.domain(yOther.domain()))
+          .translate(translate)
+          .scale(scale)
       },
+
       'tip:update': function (x, y, index) {
         var meta = instance.root.datum().data[index]
         var title = meta.title || ''
@@ -1256,36 +1290,34 @@ module.exports = function (options) {
 
         instance.root.select('.top-right-legend')
           .attr('fill', globals.COLORS[index])
-          // .text(x.toFixed(3) + ', ' + y.toFixed(3))
           .text(text.join(' '))
       }
+
     }
 
     var all = {
       mousemove: function () {
         var mouse = d3.mouse(instance.root.select('rect.zoom-and-drag').node())
-        var x = xScale.invert(mouse[0])
-        var y = yScale.invert(mouse[1])
+        var coordinates = {
+          x: xScale.invert(mouse[0]),
+          y: yScale.invert(mouse[1])
+        }
         instance.linkedGraphs.forEach(function (graph) {
-          graph.emit('mousemove', x, y)
+          graph.emit('before:mousemove', coordinates)
+          graph.emit('mousemove', coordinates)
         })
       },
 
-      zoom: function (xScale, yScale) {
+      zoom: function (translate, scale) {
         instance.linkedGraphs.forEach(function (graph, i) {
-          // since its scale was updated through d3.behavior.zoom
-          // we don't need to do it again
-          if (i) {
-            graph.emit('zoom:scaleUpdate', xScale, yScale)
-          }
-          // the first element is the instance who fired the event,
-          // content draw
+          graph.emit('zoom', translate, scale)
           graph.draw()
         })
 
         // emit the position of the mouse to all the registered graphs
         instance.emit('all:mousemove')
       }
+
     }
 
     Object.keys(events).forEach(function (e) {
@@ -1319,7 +1351,7 @@ graphTypes = module.exports.graphTypes = require('./graph-types/')
 module.exports.plugins = require('./plugins/')
 module.exports.eval = require('./helpers/eval')
 
-},{"./datum-defaults":1,"./globals":3,"./graph-types/":4,"./helpers/":11,"./helpers/annotations":8,"./helpers/eval":10,"./plugins/":15,"./polyfills":17,"./tip":20,"events":107,"extend":54}],14:[function(require,module,exports){
+},{"./datum-defaults":1,"./globals":3,"./graph-types/":4,"./helpers/":11,"./helpers/annotations":8,"./helpers/eval":10,"./plugins/":15,"./polyfills":17,"./tip":20,"events":117,"extend":54}],14:[function(require,module,exports){
 var d3 = window.d3
 var extend = require('extend')
 var pressed = require('key-pressed')
@@ -1421,7 +1453,7 @@ module.exports = function (options) {
   return inner
 }
 
-},{"extend":54,"integrate-adaptive-simpson":55,"key-pressed":103,"keydown":105}],15:[function(require,module,exports){
+},{"extend":54,"integrate-adaptive-simpson":55,"key-pressed":106,"keydown":108}],15:[function(require,module,exports){
 module.exports = {
   zoomBox: require('./zoom-box'),
   definiteIntegral: require('./definite-integral')
@@ -1518,7 +1550,7 @@ module.exports = function (options) {
   return inner
 }
 
-},{"extend":54,"key-pressed":103,"keydown":105}],17:[function(require,module,exports){
+},{"extend":54,"key-pressed":106,"keydown":108}],17:[function(require,module,exports){
 // issue: https://github.com/maurizzzio/function-plot/issues/6
 // solution: the line type is selecting the derivative line when the content is re-drawn, then when the
 // derivative was redrawn an already selected line (by the line type) was used thus making a single line
@@ -1551,8 +1583,10 @@ module.exports = function (options) {
 
 },{}],18:[function(require,module,exports){
 'use strict'
-var utils = require('../utils')
 var clamp = require('clamp')
+var linspace = require('linspace')
+
+var utils = require('../utils')
 var evaluate = require('../helpers/eval').builtIn
 
 function checkAsymptote (d0, d1, meta, sign, level) {
@@ -1567,7 +1601,7 @@ function checkAsymptote (d0, d1, meta, sign, level) {
   var n = 10
   var x0 = d0[0]
   var x1 = d1[0]
-  var samples = utils.linspace([x0, x1], n)
+  var samples = linspace(x0, x1, n)
   var oldY, oldX
   for (i = 0; i < n; i += 1) {
     var x = samples[i]
@@ -1652,7 +1686,7 @@ function split (chart, meta, data) {
 }
 
 function linear (chart, meta, range, n) {
-  var allX = utils.linspace(range, n)
+  var allX = utils.space(chart, range, n)
   var yDomain = chart.meta.yScale.domain()
   var yDomainMargin = (yDomain[1] - yDomain[0])
   var yMin = yDomain[0] - yDomainMargin * 1e5
@@ -1674,7 +1708,7 @@ function parametric (chart, meta, range, nSamples) {
   // range is mapped to canvas coordinates from the input
   // for parametric plots the range will tell the start/end points of the `t` param
   var parametricRange = meta.range || [0, 2 * Math.PI]
-  var tCoords = utils.linspace(parametricRange, nSamples)
+  var tCoords = utils.space(chart, parametricRange, nSamples)
   var samples = []
   for (var i = 0; i < tCoords.length; i += 1) {
     var t = tCoords[i]
@@ -1689,7 +1723,7 @@ function polar (chart, meta, range, nSamples) {
   // range is mapped to canvas coordinates from the input
   // for polar plots the range will tell the start/end points of the `theta` param
   var polarRange = meta.range || [-Math.PI, Math.PI]
-  var thetaSamples = utils.linspace(polarRange, nSamples)
+  var thetaSamples = utils.space(chart, polarRange, nSamples)
   var samples = []
   for (var i = 0; i < thetaSamples.length; i += 1) {
     var theta = thetaSamples[i]
@@ -1729,7 +1763,7 @@ var sampler = function (chart, d, range, nSamples) {
 
 module.exports = sampler
 
-},{"../helpers/eval":10,"../utils":21,"clamp":53}],19:[function(require,module,exports){
+},{"../helpers/eval":10,"../utils":21,"clamp":53,"linspace":110}],19:[function(require,module,exports){
 /**
  * Created by mauricio on 5/14/15.
  */
@@ -1744,8 +1778,7 @@ var utils = require('../utils')
 intervalArithmeticEval.policies.disableRounding()
 
 function interval1d (chart, meta, range, nSamples) {
-  var xCoords = utils.linspace(range, nSamples)
-
+  var xCoords = utils.space(chart, range, nSamples)
   var xScale = chart.meta.xScale
   var yScale = chart.meta.yScale
   var yMin = yScale.domain()[0]
@@ -1755,10 +1788,10 @@ function interval1d (chart, meta, range, nSamples) {
   for (i = 0; i < xCoords.length - 1; i += 1) {
     var x = {lo: xCoords[i], hi: xCoords[i + 1]}
     var y = evaluate(meta, 'fn', {x: x})
-    if (!Interval.empty(y) && !Interval.whole(y)) {
+    if (!Interval.isEmpty(y) && !Interval.isWhole(y)) {
       samples.push([x, y])
     }
-    if (Interval.whole(y)) {
+    if (Interval.isWhole(y)) {
       // means that the next and prev intervals need to be fixed
       samples.push(null)
     }
@@ -1769,7 +1802,7 @@ function interval1d (chart, meta, range, nSamples) {
     if (!samples[i]) {
       var prev = samples[i - 1]
       var next = samples[i + 1]
-      if (prev && next && !Interval.overlap(prev[1], next[1])) {
+      if (prev && next && !Interval.intervalsOverlap(prev[1], next[1])) {
         // case:
         //
         //   |
@@ -1931,7 +1964,7 @@ module.exports = function (config) {
     selection.selectAll('.tip-y-line').style('display', config.yLine ? null : 'none')
   }
 
-  tip.move = function (x0, y0) {
+  tip.move = function (coordinates) {
     var i
     var minDist = Infinity
     var closestIndex = -1
@@ -1946,6 +1979,9 @@ module.exports = function (config) {
     var width = meta.width
     var height = meta.height
 
+    var x0 = coordinates.x
+    var y0 = coordinates.y
+
     for (i = 0; i < data.length; i += 1) {
       // skipTip=true skips the evaluation in the datum
       // implicit equations cannot be evaluated with a single point
@@ -1957,7 +1993,9 @@ module.exports = function (config) {
 
       var range = data[i].range || [-inf, inf]
       if (x0 > range[0] - globals.TIP_X_EPS && x0 < range[1] + globals.TIP_X_EPS) {
-        var candidateY = builtInEvaluator(data[i], 'fn', {x: x0})
+        try {
+          var candidateY = builtInEvaluator(data[i], 'fn', {x: x0})
+        } catch (e) { }
         if (utils.isValidNumber(candidateY)) {
           var tDist = Math.abs(candidateY - y0)
           if (tDist < minDist) {
@@ -2012,6 +2050,10 @@ module.exports = function (config) {
  * Created by mauricio on 3/29/15.
  */
 'use strict'
+var linspace = require('linspace')
+var logspace = require('logspace')
+var log10 = require('log10')
+
 var globals = require('./globals')
 
 module.exports = {
@@ -2019,13 +2061,14 @@ module.exports = {
     return typeof v === 'number' && !isNaN(v)
   },
 
-  linspace: function (range, n) {
-    var samples = []
-    var delta = (range[1] - range[0]) / (n - 1)
-    for (var i = 0; i < n; i += 1) {
-      samples.push(range[0] + i * delta)
+  space: function (chart, range, n) {
+    var lo = range[0]
+    var hi = range[1]
+    if (chart.options.xAxis.type === 'log') {
+      return logspace(log10(lo), log10(hi), n)
     }
-    return samples
+    // default is linear
+    return linspace(lo, hi, n)
   },
 
   getterSetter: function (config, option) {
@@ -2050,7 +2093,7 @@ module.exports = {
   }
 }
 
-},{"./globals":3}],22:[function(require,module,exports){
+},{"./globals":3,"linspace":110,"log10":112,"logspace":113}],22:[function(require,module,exports){
 /*
  * built-in-math-eval
  *
@@ -2095,6 +2138,35 @@ module.exports = function () {
       res *= i
     }
     return res
+  }
+
+  // taken from https://github.com/josdejong/mathjs/blob/master/lib/function/arithmetic/nthRoot.js
+  math.nthRoot = function (a, root) {
+    var inv = root < 0
+    if (inv) {
+      root = -root
+    }
+
+    if (root === 0) {
+      throw new Error('Root must be non-zero')
+    }
+    if (a < 0 && (Math.abs(root) % 2 !== 1)) {
+      throw new Error('Root must be odd when a is negative.')
+    }
+
+    // edge cases zero and infinity
+    if (a === 0) {
+      return 0
+    }
+    if (!isFinite(a)) {
+      return inv ? 0 : a
+    }
+
+    var x = Math.pow(Math.abs(a), 1 / root)
+    // If a < 0, we require that root is an odd integer,
+    // so (-1) ^ (1/root) = -1
+    x = a < 0 ? -x : x
+    return inv ? 1 / x : x
   }
 
   // logical
@@ -3585,7 +3657,7 @@ module.exports = function (expression) {
 module.exports.policies = require('./policies')(Interval)
 module.exports.Interval = Interval
 
-},{"./adapter":57,"./policies":59,"interval-arithmetic":60,"math-codegen":74}],59:[function(require,module,exports){
+},{"./adapter":57,"./policies":59,"interval-arithmetic":60,"math-codegen":77}],59:[function(require,module,exports){
 /**
  * Created by mauricio on 5/12/15.
  */
@@ -3611,25 +3683,13 @@ module.exports = function (Interval) {
  */
 
 'use strict'
-
-function shallowExtend () {
-  var dest = arguments[0]
-  var p
-  for (var i = 1; i < arguments.length; i += 1) {
-    for (p in arguments[i]) {
-      if (arguments[i].hasOwnProperty(p)) {
-        dest[p] = arguments[i][p]
-      }
-    }
-  }
-}
+var extend = require('xtend/mutable')
 
 require('./lib/polyfill')
 module.exports = require('./lib/interval')
 module.exports.rmath = require('./lib/round-math')
-module.exports.double = require('./lib/double')
 
-shallowExtend(
+extend(
   module.exports,
   require('./lib/constants'),
   require('./lib/operations/relational'),
@@ -3640,7 +3700,7 @@ shallowExtend(
   require('./lib/operations/utils')
 )
 
-},{"./lib/constants":61,"./lib/double":62,"./lib/interval":63,"./lib/operations/algebra":64,"./lib/operations/arithmetic":65,"./lib/operations/misc":67,"./lib/operations/relational":68,"./lib/operations/trigonometric":69,"./lib/operations/utils":70,"./lib/polyfill":71,"./lib/round-math":72}],61:[function(require,module,exports){
+},{"./lib/constants":61,"./lib/interval":62,"./lib/operations/algebra":63,"./lib/operations/arithmetic":64,"./lib/operations/misc":66,"./lib/operations/relational":67,"./lib/operations/trigonometric":68,"./lib/operations/utils":69,"./lib/polyfill":70,"./lib/round-math":71,"xtend/mutable":76}],61:[function(require,module,exports){
 /**
  * Created by mauricio on 5/11/15.
  */
@@ -3659,94 +3719,41 @@ constants.PI_HALF_HIGH = piHigh / 2
 constants.PI_TWICE_LOW = piLow * 2
 constants.PI_TWICE_HIGH = piHigh * 2
 
+function getter (property, fn) {
+  Object.defineProperty(constants, property, {
+    get: function () {
+      return fn()
+    },
+    enumerable: true
+  })
+}
+
 // intervals
-constants.PI = new Interval(piLow, piHigh)
-constants.PI_HALF = new Interval(constants.PI_HALF_LOW, constants.PI_HALF_HIGH)
-constants.PI_TWICE = new Interval(constants.PI_TWICE_LOW, constants.PI_TWICE_HIGH)
-constants.ZERO = new Interval(0, 0)
-constants.ONE = new Interval(1, 1)
-constants.WHOLE = new Interval().setWhole()
-constants.EMPTY = new Interval().setEmpty()
+getter('PI', function () {
+  return Interval(piLow, piHigh)
+})
+getter('PI_HALF', function () {
+  return Interval(constants.PI_HALF_LOW, constants.PI_HALF_HIGH)
+})
+getter('PI_TWICE', function () {
+  return Interval(constants.PI_TWICE_LOW, constants.PI_TWICE_HIGH)
+})
+getter('ZERO', function () {
+  return Interval(0)
+})
+getter('ONE', function () {
+  return Interval(1)
+})
+getter('WHOLE', function () {
+  return Interval().setWhole()
+})
+getter('EMPTY', function () {
+  return Interval().setEmpty()
+})
 
 module.exports = constants
 
-},{"./interval":63}],62:[function(require,module,exports){
-(function (global){
-/**
- * Created by mauricio on 5/5/15.
- */
-'use strict'
-
-var TA = require('typedarray')
-
-function defineFromPolyfill (property) {
-  if (!global[property]) {
-    global[property] = TA[property]
-  }
-}
-defineFromPolyfill('Uint8Array')
-defineFromPolyfill('ArrayBuffer')
-defineFromPolyfill('DataView')
-
-// iee754 double has 64 bits
-// its binary representation explained in http://bartaz.github.io/ieee754-visualization/
-// can be analyzed with the help of ArrayBuffer, since it has no mechanism to update its
-// data a DataView is needed (the number is divided in 8 chunks of data each holding 8
-// bits)
-var buffer = new ArrayBuffer(8)
-var dv = new DataView(buffer)
-var array8 = new Uint8Array(buffer)
-
-// from https://github.com/bartaz/ieee754-visualization/blob/master/src/ieee754.js
-// float64ToOctets( 123.456 ) -> [ 64, 94, 221, 47, 26, 159, 190, 119 ]
-function float64ToOctets (number) {
-  dv.setFloat64(0, number, false)
-  return [].slice.call(new Uint8Array(buffer))
-}
-
-// from https://github.com/bartaz/ieee754-visualization/blob/master/src/ieee754.js
-// octetsToFloat64( [ 64, 94, 221, 47, 26, 159, 190, 119 ] ) -> 123.456
-function octetsToFloat64 (octets) {
-  array8.set(octets)
-  return dv.getFloat64(0, false)
-}
-
-function add (bytes, n) {
-  for (var i = 7; i >= 0; i -= 1) {
-    bytes[i] += n
-    if (bytes[i] === 256) {
-      n = 1
-      bytes[i] = 0
-    } else if (bytes[i] === -1) {
-      n = -1
-      bytes[i] = 255
-    } else {
-      n = 0
-    }
-  }
-}
-
-function solve (a, b) {
-  if (a === Number.POSITIVE_INFINITY || a === Number.NEGATIVE_INFINITY || isNaN(a)) {
-    return a
-  }
-  var bytes = float64ToOctets(a)
-  add(bytes, b)
-  return octetsToFloat64(bytes)
-}
-
-exports.doubleToOctetArray = float64ToOctets
-
-exports.ieee754NextDouble = function (n) {
-  return solve(n, 1)
-}
-
-exports.ieee754PrevDouble = function (n) {
-  return solve(n, -1)
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"typedarray":73}],63:[function(require,module,exports){
+},{"./interval":62}],62:[function(require,module,exports){
 /**
  * Created by mauricio on 4/27/15.
  */
@@ -3754,81 +3761,48 @@ exports.ieee754PrevDouble = function (n) {
 var utils = require('./operations/utils')
 var rmath = require('./round-math')
 
+module.exports = Interval
+
 function Interval (lo, hi) {
-  switch (arguments.length) {
-    case 1:
-      if (typeof lo !== 'number') {
-        throw new TypeError('lo must be a number')
-      }
-
-      this.set(lo, lo)
-      if (isNaN(lo)) {
-        this.setEmpty()
-      }
-      break
-    case 2:
-      if (typeof lo !== 'number' || typeof hi !== 'number') {
-        throw new TypeError('lo,hi must be numbers')
-      }
-
-      this.set(lo, hi)
-      if (isNaN(lo) || isNaN(hi) || lo > hi) {
-        this.setEmpty()
-      }
-      break
-    default:
-      this.lo = 0
-      this.hi = 0
-      break
-  }
-}
-
-Interval.factory = function (a, b) {
-  function assert (a, message) {
-    /* istanbul ignore next */
-    if (!a) {
-      throw new Error(message || 'assertion failed')
-    }
+  if (!(this instanceof Interval)) {
+    return new Interval(lo, hi)
   }
 
-  function singleton (x) {
-    if (typeof x === 'object') {
-      assert(typeof x.lo === 'number' && typeof x.hi === 'number', 'param must be an Interval')
-      assert(utils.singleton(x), 'param needs to be a singleton')
+  if (typeof lo !== 'undefined' && typeof hi !== 'undefined') {
+    // possible cases:
+    // - Interval(1, 2)
+    // - Interval(Interval(1, 1), Interval(2, 2))     // singletons are required
+    if (utils.isInterval(lo)) {
+      if (!utils.isSingleton(lo)) {
+        throw new TypeError('Interval: interval `lo` must be a singleton')
+      }
+      lo = lo.lo
     }
-  }
-
-  function getNumber (x) {
-    if (typeof x === 'object') {
-      singleton(x)
-      return x.lo
+    if (utils.isInterval(hi)) {
+      if (!utils.isSingleton(hi)) {
+        throw TypeError('Interval: interval `hi` must be a singleton')
+      }
+      hi = hi.hi
     }
-    return x
-  }
-
-  assert(arguments.length <= 2)
-
-  var lo, hi
-  if (arguments.length === 2) {
-    // handles:
-    // - new Interval( 1, 2 )
-    // - new Interval( new Interval(1, 1), new Interval(2, 2) )
-    lo = getNumber(a)
-    hi = getNumber(b)
-  } else if (arguments.length === 1) {
-    if (Array.isArray(a)) {
-      // handles
-      // - new Interval( [1, 2] )
-      lo = a[0]
-      hi = a[1]
-    } else {
-      lo = hi = getNumber(a)
+  } else if (typeof lo !== 'undefined') {
+    // possible cases:
+    // - Interval(1)
+    // - Interval([1, 2])
+    // - Interval([Interval(1, 1), Interval(2, 2)])
+    if (Array.isArray(lo)) {
+      return Interval(lo[0], lo[1])
     }
+    return Interval(lo, lo)
   } else {
-    return new Interval()
+    // possible cases:
+    // - Interval()
+    lo = hi = 0
   }
-  return new Interval(lo, hi)
+
+  this.assign(lo, hi)
 }
+
+Interval.factory = Interval
 
 Interval.prototype.singleton = function (v) {
   return this.set(v, v)
@@ -3849,6 +3823,9 @@ Interval.prototype.set = function (lo, hi) {
 }
 
 Interval.prototype.assign = function (lo, hi) {
+  if (typeof lo !== 'number' || typeof hi !== 'number') {
+    throw TypeError('Interval#assign: arguments must be numbers')
+  }
   if (isNaN(lo) || isNaN(hi) || lo > hi) {
     return this.setEmpty()
   }
@@ -3867,13 +3844,18 @@ Interval.prototype.toArray = function () {
   return [this.lo, this.hi]
 }
 
-module.exports = Interval
+Interval.prototype.clone = function () {
+  return Interval(this.lo, this.hi)
+}
 
-},{"./operations/utils":70,"./round-math":72}],64:[function(require,module,exports){
+},{"./operations/utils":69,"./round-math":71}],63:[function(require,module,exports){
 /**
  * Created by mauricio on 5/11/15.
  */
 'use strict'
+
+var isSafeInteger = require('is-safe-integer')
+
 var Interval = require('../interval')
 var rmath = require('../round-math')
 var utils = require('./utils')
@@ -3888,13 +3870,13 @@ var algebra = {}
  * @param y
  */
 algebra.fmod = function (x, y) {
-  if (utils.empty(x) || utils.empty(y)) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) {
     return constants.EMPTY
   }
   var yb = x.lo < 0 ? y.lo : y.hi
   var n = rmath.intLo(rmath.divLo(x.lo, yb))
   // x mod y = x - n * y
-  return arithmetic.sub(x, arithmetic.mul(y, new Interval(n, n)))
+  return arithmetic.sub(x, arithmetic.mul(y, Interval(n, n)))
 }
 
 /**
@@ -3903,20 +3885,20 @@ algebra.fmod = function (x, y) {
  * @returns {Interval}
  */
 algebra.multiplicativeInverse = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
   if (utils.zeroIn(x)) {
     if (x.lo !== 0) {
       if (x.hi !== 0) {
         return constants.WHOLE
       } else {
-        return new Interval(
+        return Interval(
           Number.NEGATIVE_INFINITY,
           rmath.divHi(1, x.lo)
         )
       }
     } else {
       if (x.hi !== 0) {
-        return new Interval(
+        return Interval(
           rmath.divLo(1, x.hi),
           Number.POSITIVE_INFINITY
         )
@@ -3925,7 +3907,7 @@ algebra.multiplicativeInverse = function (x) {
       }
     }
   } else {
-    return new Interval(
+    return Interval(
       rmath.divLo(1, x.hi),
       rmath.divHi(1, x.lo)
     )
@@ -3933,17 +3915,21 @@ algebra.multiplicativeInverse = function (x) {
 }
 
 /**
- * Computes x^power
+ * Computes x^power given that power is an integer
+ *
+ * If `power` is an Interval it must be a singletonInterval i.e. x^x is not
+ * supported yet
+ *
  * @param {Interval} x
- * @param {number|Interval} power An integer power or a singleton interval
+ * @param {number|Interval} power
  * @returns {Interval}
  */
 algebra.pow = function (x, power) {
-  if (utils.empty(x)) {
+  if (utils.isEmpty(x)) {
     return constants.EMPTY
   }
   if (typeof power === 'object') {
-    if (!utils.singleton(power)) {
+    if (!utils.isSingleton(power)) {
       return constants.EMPTY
     }
     power = power.lo
@@ -3951,8 +3937,10 @@ algebra.pow = function (x, power) {
 
   if (power === 0) {
     if (x.lo === 0 && x.hi === 0) {
+      // 0^0
       return constants.EMPTY
     } else {
+      // x^0
       return constants.ONE
     }
   } else if (power < 0) {
@@ -3961,38 +3949,46 @@ algebra.pow = function (x, power) {
   }
 
   // power > 0
-  if (x.hi < 0) {
-    // [negative, negative]
-    // assume that power is even so the operation will yield a positive interval
-    // if not then just switch the sign and order of the interval bounds
-    var yl = rmath.powLo(-x.hi, power)
-    var yh = rmath.powHi(-x.lo, power)
-    if (power & 1) {
-      return new Interval(-yh, -yl)
+  if (isSafeInteger(power)) {
+    // power is integer
+    if (x.hi < 0) {
+      // [negative, negative]
+      // assume that power is even so the operation will yield a positive interval
+      // if not then just switch the sign and order of the interval bounds
+      var yl = rmath.powLo(-x.hi, power)
+      var yh = rmath.powHi(-x.lo, power)
+      if (power & 1) {
+        // odd power
+        return Interval(-yh, -yl)
+      } else {
+        // even power
+        return Interval(yl, yh)
+      }
+    } else if (x.lo < 0) {
+      // [negative, positive]
+      if (power & 1) {
+        return Interval(
+          -rmath.powLo(-x.lo, power),
+          rmath.powHi(x.hi, power)
+        )
+      } else {
+        // even power means that any negative number will be zero (min value = 0)
+        // and the max value will be the max of x.lo^power, x.hi^power
+        return Interval(
+          0,
+          rmath.powHi(Math.max(-x.lo, x.hi), power)
+        )
+      }
     } else {
-      return new Interval(yl, yh)
-    }
-  } else if (x.lo < 0) {
-    // [negative, positive]
-    if (power & 1) {
-      return new Interval(
-        -rmath.powLo(-x.lo, power),
+      // [positive, positive]
+      return Interval(
+        rmath.powLo(x.lo, power),
         rmath.powHi(x.hi, power)
-      )
-    } else {
-      // even power means that any negative number will be zero (min value = 0)
-      // and the max value will be the max of x.lo^power, x.hi^power
-      return new Interval(
-        0,
-        rmath.powHi(Math.max(-x.lo, x.hi), power)
       )
     }
   } else {
-    // [positive, positive]
-    return new Interval(
-      rmath.powLo(x.lo, power),
-      rmath.powHi(x.hi, power)
-    )
+    console.warn('power is not an integer, you should use nth-root instead, returning an empty interval')
+    return constants.EMPTY
   }
 }
 
@@ -4002,19 +3998,62 @@ algebra.pow = function (x, power) {
  * @returns {Interval}
  */
 algebra.sqrt = function (x) {
-  if (utils.empty(x) || x.hi < 0) {
-    return constants.EMPTY
-  }
-  // lower bound min value can't be negative
-  var t = x.lo <= 0 ? 0 : rmath.sqrtLo(x.lo)
-  return new Interval(t, rmath.sqrtHi(x.hi))
+  return algebra.nthRoot(x, 2)
 }
 
-// TODO: root finding
+/**
+ * Computes x^(1/n)
+ *
+ * @param {Interval} x
+ * @param {number} n - An integer which is the nth root of x
+ * @return {Interval}
+ */
+algebra.nthRoot = function (x, n) {
+  if (utils.isEmpty(x) || n < 0) {
+    // compute 1 / x^-power if power is negative
+    return constants.EMPTY
+  }
+
+  // singleton interval check
+  if (typeof n === 'object') {
+    if (!utils.isSingleton(n)) {
+      return constants.EMPTY
+    }
+    n = n.lo
+  }
+
+  var power = 1 / n
+  if (x.hi < 0) {
+    // [negative, negative]
+    if (isSafeInteger(n) & (n & 1)) {
+      // when n is odd we can always take the nth root
+      var yl = rmath.powHi(-x.lo, power)
+      var yh = rmath.powLo(-x.hi, power)
+      return Interval(-yl, -yh)
+    }
+    // n is not odd therefore there's no nth root
+    return Interval.EMPTY
+  } else if (x.lo < 0) {
+    // [negative, positive]
+    var yp = rmath.powHi(x.hi, power)
+    if (isSafeInteger(n) & (n & 1)) {
+      // nth root of x.lo is possible (n is odd)
+      var yn = rmath.powHi(-x.lo, power)
+      return Interval(0, Math.max(yn, yp))
+    }
+    return Interval(0, yp)
+  } else {
+    // [positive, positive]
+    return Interval(
+      rmath.powLo(x.lo, power),
+      rmath.powHi(x.hi, power)
+    )
+  }
+}
 
 module.exports = algebra
 
-},{"../constants":61,"../interval":63,"../round-math":72,"./arithmetic":65,"./utils":70}],65:[function(require,module,exports){
+},{"../constants":61,"../interval":62,"../round-math":71,"./arithmetic":64,"./utils":69,"is-safe-integer":72}],64:[function(require,module,exports){
 /**
  * Created by mauricio on 5/10/15.
  */
@@ -4029,28 +4068,28 @@ var arithmetic = {}
 
 // BINARY
 arithmetic.add = function (a, b) {
-  return new Interval(
+  return Interval(
     rmath.addLo(a.lo, b.lo),
     rmath.addHi(a.hi, b.hi)
   )
 }
 
 arithmetic.sub = function (a, b) {
-  return new Interval(
+  return Interval(
     rmath.subLo(a.lo, b.hi),
     rmath.subHi(a.hi, b.lo)
   )
 }
 
 arithmetic.mul = function (a, b) {
-  if (utils.empty(a) || utils.empty(b)) {
+  if (utils.isEmpty(a) || utils.isEmpty(b)) {
     return constants.EMPTY
   }
   var al = a.lo
   var ah = a.hi
   var bl = b.lo
   var bh = b.hi
-  var out = new Interval()
+  var out = Interval()
   if (al < 0) {
     if (ah > 0) {
       if (bl < 0) {
@@ -4130,7 +4169,7 @@ arithmetic.mul = function (a, b) {
 }
 
 arithmetic.div = function (a, b) {
-  if (utils.empty(a) || utils.empty(b)) {
+  if (utils.isEmpty(a) || utils.isEmpty(b)) {
     return constants.EMPTY
   }
   if (utils.zeroIn(b)) {
@@ -4154,16 +4193,16 @@ arithmetic.div = function (a, b) {
 
 // UNARY
 arithmetic.positive = function (a) {
-  return new Interval(a.lo, a.hi)
+  return Interval(a.lo, a.hi)
 }
 
 arithmetic.negative = function (a) {
-  return new Interval(-a.hi, -a.lo)
+  return Interval(-a.hi, -a.lo)
 }
 
 module.exports = arithmetic
 
-},{"../constants":61,"../interval":63,"../round-math":72,"./division":66,"./utils":70}],66:[function(require,module,exports){
+},{"../constants":61,"../interval":62,"../round-math":71,"./division":65,"./utils":69}],65:[function(require,module,exports){
 /**
  * Created by mauricio on 5/10/15.
  */
@@ -4185,7 +4224,7 @@ var division = {
     var xh = x.hi
     var yl = y.lo
     var yh = y.hi
-    var out = new Interval()
+    var out = Interval()
     if (xh < 0) {
       if (yh < 0) {
         out.lo = rmath.divLo(xh, yl)
@@ -4232,13 +4271,13 @@ var division = {
 
     if (x.hi < 0) {
       // negative / v
-      return new Interval(
+      return Interval(
         Number.NEGATIVE_INFINITY,
         rmath.divHi(x.hi, v)
       )
     } else {
       // positive / v
-      return new Interval(
+      return Interval(
         rmath.divLo(x.lo, v),
         Number.POSITIVE_INFINITY
       )
@@ -4263,13 +4302,13 @@ var division = {
 
     if (x.hi < 0) {
       // negative / v
-      return new Interval(
+      return Interval(
         rmath.divLo(x.hi, v),
         Number.POSITIVE_INFINITY
       )
     } else {
       // positive / v
-      return new Interval(
+      return Interval(
         Number.NEGATIVE_INFINITY,
         rmath.divHi(x.lo, v)
       )
@@ -4291,7 +4330,7 @@ var division = {
 
 module.exports = division
 
-},{"../constants":61,"../interval":63,"../round-math":72,"./utils":70}],67:[function(require,module,exports){
+},{"../constants":61,"../interval":62,"../round-math":71,"./utils":69}],66:[function(require,module,exports){
 /**
  * Created by mauricio on 5/11/15.
  */
@@ -4305,44 +4344,49 @@ var arithmetic = require('./arithmetic')
 var misc = {}
 
 misc.exp = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  return new Interval(
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  return Interval(
     rmath.expLo(x.lo),
     rmath.expHi(x.hi)
   )
 }
 
 misc.log = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
   var l = x.lo <= 0 ? Number.NEGATIVE_INFINITY : rmath.logLo(x.lo)
-  return new Interval(l, rmath.logHi(x.hi))
+  return Interval(l, rmath.logHi(x.hi))
 }
 
 misc.ln = misc.log
 
-misc.LOG_EXP_10 = misc.log(new Interval(10, 10))
+misc.LOG_EXP_10 = misc.log(Interval(10, 10))
 
 misc.log10 = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
   return arithmetic.div(misc.log(x), misc.LOG_EXP_10)
 }
 
-misc.LOG_EXP_2 = misc.log(new Interval(2, 2))
+misc.LOG_EXP_2 = misc.log(Interval(2, 2))
 
 misc.log2 = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
   return arithmetic.div(misc.log(x), misc.LOG_EXP_2)
 }
 
-// elementary
 misc.hull = function (x, y) {
-  var badX = utils.empty(x)
-  var badY = utils.empty(y)
+  var badX = utils.isEmpty(x)
+  var badY = utils.isEmpty(y)
   if (badX) {
-    if (badY) { return constants.EMPTY } else { return y }
+    if (badY) {
+      return constants.EMPTY
+    } else {
+      return y.clone()
+    }
   } else {
-    if (badY) { return x } else {
-      return new Interval(
+    if (badY) {
+      return x.clone()
+    } else {
+      return Interval(
         Math.min(x.lo, y.lo),
         Math.max(x.hi, y.hi)
       )
@@ -4350,34 +4394,73 @@ misc.hull = function (x, y) {
   }
 }
 
-misc.intersect = function (x, y) {
-  if (utils.empty(x) || utils.empty(y)) { return constants.EMPTY }
+misc.intersection = function (x, y) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) { return constants.EMPTY }
   var lo = Math.max(x.lo, y.lo)
   var hi = Math.min(x.hi, y.hi)
   if (lo <= hi) {
-    return new Interval(lo, hi)
+    return Interval(lo, hi)
   }
   return constants.EMPTY
 }
 
+misc.union = function (x, y) {
+  if (!utils.intervalsOverlap(x, y)) {
+    throw TypeError('Interval.union: intervals do not overlap')
+  }
+  return Interval(
+    Math.min(x.lo, y.lo),
+    Math.max(x.hi, y.hi)
+  )
+}
+
+misc.difference = function (x, y) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) {
+    return constants.EMPTY
+  }
+  if (utils.intervalsOverlap(x, y)) {
+    if (x.lo < y.lo && y.hi < x.hi) {
+      // difference creates multiple subsets
+      throw TypeError('Interval.difference: difference creates multiple intervals')
+    }
+    if (y.lo < x.lo) {
+      return Interval(rmath.next(y.hi), x.hi)
+    }
+    if (y.hi > x.hi) {
+      return Interval(x.lo, rmath.prev(y.lo))
+    }
+  }
+  return Interval.clone(x)
+}
+
+/**
+ * Computes the distance of the bounds of an interval
+ * @param {Interval} x
+ * @returns {number}
+ */
+misc.width = function (x) {
+  if (utils.isEmpty(x)) { return 0 }
+  return rmath.subHi(x.hi, x.lo)
+}
+
 misc.abs = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  if (x.lo >= 0) { return x }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  if (x.lo >= 0) { return Interval.clone(x) }
   if (x.hi <= 0) { return arithmetic.negative(x) }
-  return new Interval(0, Math.max(-x.lo, x.hi))
+  return Interval(0, Math.max(-x.lo, x.hi))
 }
 
 misc.max = function (x, y) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  return new Interval(
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  return Interval(
     Math.max(x.lo, y.lo),
     Math.max(x.hi, y.hi)
   )
 }
 
 misc.min = function (x, y) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  return new Interval(
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  return Interval(
     Math.min(x.lo, y.lo),
     Math.min(x.hi, y.hi)
   )
@@ -4385,12 +4468,12 @@ misc.min = function (x, y) {
 
 misc.clone = function (x) {
   // no bound checking
-  return new Interval().set(x.lo, x.hi)
+  return Interval().set(x.lo, x.hi)
 }
 
 module.exports = misc
 
-},{"../constants":61,"../interval":63,"../round-math":72,"./arithmetic":65,"./utils":70}],68:[function(require,module,exports){
+},{"../constants":61,"../interval":62,"../round-math":71,"./arithmetic":64,"./utils":69}],67:[function(require,module,exports){
 /**
  * Created by mauricio on 5/14/15.
  */
@@ -4408,10 +4491,10 @@ var relational = {}
  * @returns {boolean}
  */
 relational.equal = function (x, y) {
-  if (utils.empty(x)) {
-    return utils.empty(y)
+  if (utils.isEmpty(x)) {
+    return utils.isEmpty(y)
   }
-  return !utils.empty(y) && x.lo === y.lo && x.hi === y.hi
+  return !utils.isEmpty(y) && x.lo === y.lo && x.hi === y.hi
 }
 
 // <debug>
@@ -4425,7 +4508,7 @@ relational.almostEqual = function (x, y) {
   }
 
   function assertEps (a, b) {
-    assert(Math.abs(a - b) < EPS)
+    assert(Math.abs(a - b) < EPS, 'expected ' + a + ' to be close to ' + b)
   }
 
   x = Array.isArray(x) ? x : x.toArray()
@@ -4443,10 +4526,10 @@ relational.almostEqual = function (x, y) {
  * @returns {boolean}
  */
 relational.notEqual = function (x, y) {
-  if (utils.empty(x)) {
-    return !utils.empty(y)
+  if (utils.isEmpty(x)) {
+    return !utils.isEmpty(y)
   }
-  return utils.empty(y) || x.hi < y.lo || x.lo > y.hi
+  return utils.isEmpty(y) || x.hi < y.lo || x.lo > y.hi
 }
 
 /**
@@ -4456,7 +4539,7 @@ relational.notEqual = function (x, y) {
  * @return {boolean}
  */
 relational.lt = function (x, y) {
-  if (utils.empty(x) || utils.empty(y)) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) {
     return false
   }
   return x.hi < y.lo
@@ -4469,7 +4552,7 @@ relational.lt = function (x, y) {
  * @return {boolean}
  */
 relational.gt = function (x, y) {
-  if (utils.empty(x) || utils.empty(y)) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) {
     return false
   }
   return x.lo > y.hi
@@ -4482,7 +4565,7 @@ relational.gt = function (x, y) {
  * @return {boolean}
  */
 relational.leq = function (x, y) {
-  if (utils.empty(x) || utils.empty(y)) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) {
     return false
   }
   return x.hi <= y.lo
@@ -4495,7 +4578,7 @@ relational.leq = function (x, y) {
  * @return {boolean}
  */
 relational.geq = function (x, y) {
-  if (utils.empty(x) || utils.empty(y)) {
+  if (utils.isEmpty(x) || utils.isEmpty(y)) {
     return false
   }
   return x.lo >= y.hi
@@ -4503,7 +4586,7 @@ relational.geq = function (x, y) {
 
 module.exports = relational
 
-},{"./utils":70}],69:[function(require,module,exports){
+},{"./utils":69}],68:[function(require,module,exports){
 /**
  * Created by mauricio on 5/10/15.
  */
@@ -4512,6 +4595,7 @@ var constants = require('../constants')
 var Interval = require('../interval')
 var rmath = require('../round-math')
 var utils = require('./utils')
+var misc = require('./misc')
 var algebra = require('./algebra')
 var arithmetic = require('./arithmetic')
 
@@ -4519,7 +4603,7 @@ var trigonometric = {}
 
 trigonometric.cos = function (x) {
   var rlo, rhi
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
 
   // cos works with positive intervals only
   if (x.lo < 0) {
@@ -4530,8 +4614,8 @@ trigonometric.cos = function (x) {
 
   var pi2 = constants.PI_TWICE
   var t = algebra.fmod(x, pi2)
-  if (utils.width(t) >= pi2.lo) {
-    return new Interval(-1, 1)
+  if (misc.width(t) >= pi2.lo) {
+    return Interval(-1, 1)
   }
 
   // when t.lo > pi it's the same as
@@ -4551,26 +4635,26 @@ trigonometric.cos = function (x) {
   if (hi <= constants.PI_LOW) {
     // when t.hi < pi
     // [cos(t.lo), cos(t.hi)]
-    return new Interval(rlo, rhi)
+    return Interval(rlo, rhi)
   } else if (hi <= pi2.lo) {
     // when t.hi < 2pi
     // [-1, max(cos(t.lo), cos(t.hi))]
-    return new Interval(-1, Math.max(rlo, rhi))
+    return Interval(-1, Math.max(rlo, rhi))
   } else {
     // t.lo < pi and t.hi > 2pi
-    return new Interval(-1, 1)
+    return Interval(-1, 1)
   }
 }
 
 trigonometric.sin = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
   return trigonometric.cos(
     arithmetic.sub(x, constants.PI_HALF)
   )
 }
 
 trigonometric.tan = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
 
   // // tan works with positive intervals only
   if (x.lo < 0) {
@@ -4587,54 +4671,54 @@ trigonometric.tan = function (x) {
   if (t.lo <= -constants.PI_HALF_LOW || t.hi >= constants.PI_HALF_LOW) {
     return constants.WHOLE
   }
-  return new Interval(
+  return Interval(
     rmath.tanLo(t.lo),
     rmath.tanHi(t.hi)
   )
 }
 
 trigonometric.asin = function (x) {
-  if (utils.empty(x) || x.hi < -1 || x.lo > 1) {
+  if (utils.isEmpty(x) || x.hi < -1 || x.lo > 1) {
     return constants.EMPTY
   }
   var lo = x.lo <= -1 ? -constants.PI_HALF_HIGH : rmath.asinLo(x.lo)
   var hi = x.hi >= 1 ? constants.PI_HALF_HIGH : rmath.asinHi(x.hi)
-  return new Interval(lo, hi)
+  return Interval(lo, hi)
 }
 
 trigonometric.acos = function (x) {
-  if (utils.empty(x) || x.hi < -1 || x.lo > 1) {
+  if (utils.isEmpty(x) || x.hi < -1 || x.lo > 1) {
     return constants.EMPTY
   }
   var lo = x.hi >= 1 ? 0 : rmath.acosLo(x.hi)
   var hi = x.lo <= -1 ? constants.PI_HIGH : rmath.acosHi(x.lo)
-  return new Interval(lo, hi)
+  return Interval(lo, hi)
 }
 
 trigonometric.atan = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  return new Interval(rmath.atanLo(x.lo), rmath.atanHi(x.hi))
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  return Interval(rmath.atanLo(x.lo), rmath.atanHi(x.hi))
 }
 
 trigonometric.sinh = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  return new Interval(rmath.sinhLo(x.lo), rmath.sinhHi(x.hi))
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  return Interval(rmath.sinhLo(x.lo), rmath.sinhHi(x.hi))
 }
 
 trigonometric.cosh = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
+  if (utils.isEmpty(x)) { return constants.EMPTY }
   if (x.hi < 0) {
-    return new Interval(
+    return Interval(
       rmath.coshLo(x.hi),
       rmath.coshHi(x.lo)
     )
   } else if (x.lo >= 0) {
-    return new Interval(
+    return Interval(
       rmath.coshLo(x.lo),
       rmath.coshHi(x.hi)
     )
   } else {
-    return new Interval(
+    return Interval(
       1,
       rmath.coshHi(-x.lo > x.hi ? x.lo : x.hi)
     )
@@ -4642,22 +4726,30 @@ trigonometric.cosh = function (x) {
 }
 
 trigonometric.tanh = function (x) {
-  if (utils.empty(x)) { return constants.EMPTY }
-  return new Interval(rmath.tanhLo(x.lo), rmath.tanhHi(x.hi))
+  if (utils.isEmpty(x)) { return constants.EMPTY }
+  return Interval(rmath.tanhLo(x.lo), rmath.tanhHi(x.hi))
 }
 
 // TODO: inverse hyperbolic functions (asinh, acosh, atanh)
 
 module.exports = trigonometric
 
-},{"../constants":61,"../interval":63,"../round-math":72,"./algebra":64,"./arithmetic":65,"./utils":70}],70:[function(require,module,exports){
+},{"../constants":61,"../interval":62,"../round-math":71,"./algebra":63,"./arithmetic":64,"./misc":66,"./utils":69}],69:[function(require,module,exports){
 /**
  * Created by mauricio on 5/10/15.
  */
 'use strict'
-var rmath = require('../round-math')
-
 var utils = {}
+
+/**
+ * Checks if the given parameter is an interval
+ * @param  {*}  x An object that must have the properties `lo` and `hi` properties
+ * to be an interval
+ * @return {Boolean} true if `x` is an interval
+ */
+utils.isInterval = function (x) {
+  return typeof x === 'object' && typeof x.lo === 'number' && typeof x.hi === 'number'
+}
 
 /**
  * Checks if an interval is empty, it's empty whenever
@@ -4665,7 +4757,7 @@ var utils = {}
  * @param {Interval} a
  * @returns {boolean}
  */
-utils.empty = function (a) {
+utils.isEmpty = function (a) {
   return a.lo > a.hi
 }
 
@@ -4675,17 +4767,27 @@ utils.empty = function (a) {
  * @param {Interval} a
  * @returns {boolean}
  */
-utils.whole = function (a) {
+utils.isWhole = function (a) {
   return a.lo === -Infinity && a.hi === Infinity
 }
 
 /**
+/**
+ * Checks if the intervals `x` is a singleton (an interval representing a single value)
+ * @param {Interval} x
+ * @returns {boolean}
+ */
+utils.isSingleton = function (x) {
+  return !utils.isEmpty(x) && x.lo === x.hi
+}
+
+/*
  * True if zero is included in the interval `a`
  * @param {Interval} a
  * @returns {boolean}
  */
 utils.zeroIn = function (a) {
-  return utils.in(a, 0)
+  return utils.hasValue(a, 0)
 }
 
 /**
@@ -4694,8 +4796,8 @@ utils.zeroIn = function (a) {
  * @param {number} v
  * @returns {boolean}
  */
-utils.in = function (a, v) {
-  if (utils.empty(a)) { return false }
+utils.hasValue = function (a, v) {
+  if (utils.isEmpty(a)) { return false }
   return a.lo <= v && v <= a.hi
 }
 
@@ -4705,9 +4807,9 @@ utils.in = function (a, v) {
  * @param {Interval} b
  * @returns {boolean}
  */
-utils.subset = function (a, b) {
-  if (utils.empty(a)) { return true }
-  return !utils.empty(b) && b.lo <= a.lo && a.hi <= b.hi
+utils.hasInterval = function (a, b) {
+  if (utils.isEmpty(a)) { return true }
+  return !utils.isEmpty(b) && b.lo <= a.lo && a.hi <= b.hi
 }
 
 /**
@@ -4716,34 +4818,15 @@ utils.subset = function (a, b) {
  * @param {Interval} b
  * @returns {boolean}
  */
-utils.overlap = function (a, b) {
-  if (utils.empty(a) || utils.empty(b)) { return false }
+utils.intervalsOverlap = function (a, b) {
+  if (utils.isEmpty(a) || utils.isEmpty(b)) { return false }
   return (a.lo <= b.lo && b.lo <= a.hi) ||
   (b.lo <= a.lo && a.lo <= b.hi)
 }
 
-/**
- * Checks if the intervals `x` is a singleton (an interval representing a single value)
- * @param {Interval} x
- * @returns {boolean}
- */
-utils.singleton = function (x) {
-  return !utils.empty(x) && x.lo === x.hi
-}
-
-/**
- * Computes the distance of the bounds of an interval
- * @param {Interval} x
- * @returns {number}
- */
-utils.width = function (x) {
-  if (utils.empty(x)) { return 0 }
-  return rmath.subHi(x.hi, x.lo)
-}
-
 module.exports = utils
 
-},{"../round-math":72}],71:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 /**
  * Created by mauricio on 5/11/15.
  */
@@ -4771,92 +4854,84 @@ Math.tanh = Math.tanh || function (x) {
   }
 }
 
-},{}],72:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 /**
  * Created by mauricio on 4/27/15.
  */
 'use strict'
-var double = require('./double')
+var nextafter = require('nextafter')
 
-var round = {}
-var MIN_VALUE = double.ieee754NextDouble(0)
-
-round.POSITIVE_ZERO = +0
-round.NEGATIVE_ZERO = -0
-
-var oldNext
-var next = oldNext = round.next = function (v) {
-  if (v === 0) {
-    return MIN_VALUE
+function identity (v) { return v }
+function prev (v) {
+  if (v === Infinity) {
+    return v
   }
-  if (Math.abs(v) < Number.POSITIVE_INFINITY) {
-    if (v > 0) {
-      return double.ieee754NextDouble(v)
-    } else {
-      // v can't be zero at this point, it's < 0
-      return double.ieee754PrevDouble(v)
-    }
+  return nextafter(v, -Infinity)
+}
+function next (v) {
+  if (v === -Infinity) {
+    return v
   }
-  return v
+  return nextafter(v, Infinity)
 }
 
-var oldPrev
-var prev = oldPrev = round.prev = function (v) {
-  return -next(-v)
+var round = {
+  prev: prev,
+  next: next
 }
 
-round.addLo = function (x, y) { return prev(x + y) }
-round.addHi = function (x, y) { return next(x + y) }
+round.addLo = function (x, y) { return this.prev(x + y) }
+round.addHi = function (x, y) { return this.next(x + y) }
 
-round.subLo = function (x, y) { return prev(x - y) }
-round.subHi = function (x, y) { return next(x - y) }
+round.subLo = function (x, y) { return this.prev(x - y) }
+round.subHi = function (x, y) { return this.next(x - y) }
 
-round.mulLo = function (x, y) { return prev(x * y) }
-round.mulHi = function (x, y) { return next(x * y) }
+round.mulLo = function (x, y) { return this.prev(x * y) }
+round.mulHi = function (x, y) { return this.next(x * y) }
 
-round.divLo = function (x, y) { return prev(x / y) }
-round.divHi = function (x, y) { return next(x / y) }
+round.divLo = function (x, y) { return this.prev(x / y) }
+round.divHi = function (x, y) { return this.next(x / y) }
 
 function toInteger (x) {
   return x < 0 ? Math.ceil(x) : Math.floor(x)
 }
 
-round.intLo = function (x) { return toInteger(prev(x)) }
-round.intHi = function (x) { return toInteger(next(x)) }
+round.intLo = function (x) { return toInteger(this.prev(x)) }
+round.intHi = function (x) { return toInteger(this.next(x)) }
 
-round.logLo = function (x) { return prev(Math.log(x)) }
-round.logHi = function (x) { return next(Math.log(x)) }
+round.logLo = function (x) { return this.prev(Math.log(x)) }
+round.logHi = function (x) { return this.next(Math.log(x)) }
 
-round.expLo = function (x) { return prev(Math.exp(x)) }
-round.expHi = function (x) { return next(Math.exp(x)) }
+round.expLo = function (x) { return this.prev(Math.exp(x)) }
+round.expHi = function (x) { return this.next(Math.exp(x)) }
 
-round.sinLo = function (x) { return prev(Math.sin(x)) }
-round.sinHi = function (x) { return next(Math.sin(x)) }
+round.sinLo = function (x) { return this.prev(Math.sin(x)) }
+round.sinHi = function (x) { return this.next(Math.sin(x)) }
 
-round.cosLo = function (x) { return prev(Math.cos(x)) }
-round.cosHi = function (x) { return next(Math.cos(x)) }
+round.cosLo = function (x) { return this.prev(Math.cos(x)) }
+round.cosHi = function (x) { return this.next(Math.cos(x)) }
 
-round.tanLo = function (x) { return prev(Math.tan(x)) }
-round.tanHi = function (x) { return next(Math.tan(x)) }
+round.tanLo = function (x) { return this.prev(Math.tan(x)) }
+round.tanHi = function (x) { return this.next(Math.tan(x)) }
 
-round.asinLo = function (x) { return prev(Math.asin(x)) }
-round.asinHi = function (x) { return next(Math.asin(x)) }
+round.asinLo = function (x) { return this.prev(Math.asin(x)) }
+round.asinHi = function (x) { return this.next(Math.asin(x)) }
 
-round.acosLo = function (x) { return prev(Math.acos(x)) }
-round.acosHi = function (x) { return next(Math.acos(x)) }
+round.acosLo = function (x) { return this.prev(Math.acos(x)) }
+round.acosHi = function (x) { return this.next(Math.acos(x)) }
 
-round.atanLo = function (x) { return prev(Math.atan(x)) }
-round.atanHi = function (x) { return next(Math.atan(x)) }
+round.atanLo = function (x) { return this.prev(Math.atan(x)) }
+round.atanHi = function (x) { return this.next(Math.atan(x)) }
 
 // polyfill required for hyperbolic functions
-round.sinhLo = function (x) { return prev(Math.sinh(x)) }
-round.sinhHi = function (x) { return next(Math.sinh(x)) }
+round.sinhLo = function (x) { return this.prev(Math.sinh(x)) }
+round.sinhHi = function (x) { return this.next(Math.sinh(x)) }
 
-round.coshLo = function (x) { return prev(Math.cosh(x)) }
-round.coshHi = function (x) { return next(Math.cosh(x)) }
+round.coshLo = function (x) { return this.prev(Math.cosh(x)) }
+round.coshHi = function (x) { return this.next(Math.cosh(x)) }
 
-round.tanhLo = function (x) { return prev(Math.tanh(x)) }
-round.tanhHi = function (x) { return next(Math.tanh(x)) }
+round.tanhLo = function (x) { return this.prev(Math.tanh(x)) }
+round.tanhHi = function (x) { return this.next(Math.tanh(x)) }
 
 /**
  * ln(power) exponentiation of x
@@ -4867,7 +4942,7 @@ round.tanhHi = function (x) { return next(Math.tanh(x)) }
 round.powLo = function (x, power) {
   if (power % 1 !== 0) {
     // power has decimals
-    return prev(Math.pow(x, power))
+    return this.prev(Math.pow(x, power))
   }
 
   var y = (power & 1) ? x : 1
@@ -4891,7 +4966,7 @@ round.powLo = function (x, power) {
 round.powHi = function (x, power) {
   if (power % 1 !== 0) {
     // power has decimals
-    return next(Math.pow(x, power))
+    return this.next(Math.pow(x, power))
   }
 
   var y = (power & 1) ? x : 1
@@ -4906,718 +4981,262 @@ round.powHi = function (x, power) {
   return y
 }
 
-round.sqrtLo = function (x) { return prev(Math.sqrt(x)) }
-round.sqrtHi = function (x) { return next(Math.sqrt(x)) }
+round.sqrtLo = function (x) { return this.prev(Math.sqrt(x)) }
+round.sqrtHi = function (x) { return this.next(Math.sqrt(x)) }
 
 round.disable = function () {
-  next = prev = round.next = round.prev = function (v) {
-    return v
-  }
+  this.next = this.prev = identity
 }
 
 round.enable = function () {
-  prev = round.prev = oldPrev
-  next = round.next = oldNext
+  this.next = next
+  this.prev = prev
 }
 
 module.exports = round
 
-},{"./double":62}],73:[function(require,module,exports){
-var undefined = (void 0); // Paranoia
+},{"nextafter":74}],72:[function(require,module,exports){
+'use strict';
+var MAX_SAFE_INTEGER = require('max-safe-integer');
 
-// Beyond this value, index getters/setters (i.e. array[0], array[1]) are so slow to
-// create, and consume so much memory, that the browser appears frozen.
-var MAX_ARRAY_LENGTH = 1e5;
-
-// Approximations of internal ECMAScript conversion functions
-var ECMAScript = (function() {
-  // Stash a copy in case other scripts modify these
-  var opts = Object.prototype.toString,
-      ophop = Object.prototype.hasOwnProperty;
-
-  return {
-    // Class returns internal [[Class]] property, used to avoid cross-frame instanceof issues:
-    Class: function(v) { return opts.call(v).replace(/^\[object *|\]$/g, ''); },
-    HasProperty: function(o, p) { return p in o; },
-    HasOwnProperty: function(o, p) { return ophop.call(o, p); },
-    IsCallable: function(o) { return typeof o === 'function'; },
-    ToInt32: function(v) { return v >> 0; },
-    ToUint32: function(v) { return v >>> 0; }
-  };
-}());
-
-// Snapshot intrinsics
-var LN2 = Math.LN2,
-    abs = Math.abs,
-    floor = Math.floor,
-    log = Math.log,
-    min = Math.min,
-    pow = Math.pow,
-    round = Math.round;
-
-// ES5: lock down object properties
-function configureProperties(obj) {
-  if (getOwnPropNames && defineProp) {
-    var props = getOwnPropNames(obj), i;
-    for (i = 0; i < props.length; i += 1) {
-      defineProp(obj, props[i], {
-        value: obj[props[i]],
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
-    }
-  }
-}
-
-// emulate ES5 getter/setter API using legacy APIs
-// http://blogs.msdn.com/b/ie/archive/2010/09/07/transitioning-existing-code-to-the-es5-getter-setter-apis.aspx
-// (second clause tests for Object.defineProperty() in IE<9 that only supports extending DOM prototypes, but
-// note that IE<9 does not support __defineGetter__ or __defineSetter__ so it just renders the method harmless)
-var defineProp
-if (Object.defineProperty && (function() {
-      try {
-        Object.defineProperty({}, 'x', {});
-        return true;
-      } catch (e) {
-        return false;
-      }
-    })()) {
-  defineProp = Object.defineProperty;
-} else {
-  defineProp = function(o, p, desc) {
-    if (!o === Object(o)) throw new TypeError("Object.defineProperty called on non-object");
-    if (ECMAScript.HasProperty(desc, 'get') && Object.prototype.__defineGetter__) { Object.prototype.__defineGetter__.call(o, p, desc.get); }
-    if (ECMAScript.HasProperty(desc, 'set') && Object.prototype.__defineSetter__) { Object.prototype.__defineSetter__.call(o, p, desc.set); }
-    if (ECMAScript.HasProperty(desc, 'value')) { o[p] = desc.value; }
-    return o;
-  };
-}
-
-var getOwnPropNames = Object.getOwnPropertyNames || function (o) {
-  if (o !== Object(o)) throw new TypeError("Object.getOwnPropertyNames called on non-object");
-  var props = [], p;
-  for (p in o) {
-    if (ECMAScript.HasOwnProperty(o, p)) {
-      props.push(p);
-    }
-  }
-  return props;
+module.exports = Number.isSafeInteger || function (val) {
+	return typeof val === 'number' && val === val && val !== Infinity && val !== -Infinity && parseInt(val, 10) === val && Math.abs(val) <= MAX_SAFE_INTEGER;
 };
 
-// ES5: Make obj[index] an alias for obj._getter(index)/obj._setter(index, value)
-// for index in 0 ... obj.length
-function makeArrayAccessors(obj) {
-  if (!defineProp) { return; }
-
-  if (obj.length > MAX_ARRAY_LENGTH) throw new RangeError("Array too large for polyfill");
-
-  function makeArrayAccessor(index) {
-    defineProp(obj, index, {
-      'get': function() { return obj._getter(index); },
-      'set': function(v) { obj._setter(index, v); },
-      enumerable: true,
-      configurable: false
-    });
-  }
-
-  var i;
-  for (i = 0; i < obj.length; i += 1) {
-    makeArrayAccessor(i);
-  }
-}
-
-// Internal conversion functions:
-//    pack<Type>()   - take a number (interpreted as Type), output a byte array
-//    unpack<Type>() - take a byte array, output a Type-like number
-
-function as_signed(value, bits) { var s = 32 - bits; return (value << s) >> s; }
-function as_unsigned(value, bits) { var s = 32 - bits; return (value << s) >>> s; }
-
-function packI8(n) { return [n & 0xff]; }
-function unpackI8(bytes) { return as_signed(bytes[0], 8); }
-
-function packU8(n) { return [n & 0xff]; }
-function unpackU8(bytes) { return as_unsigned(bytes[0], 8); }
-
-function packU8Clamped(n) { n = round(Number(n)); return [n < 0 ? 0 : n > 0xff ? 0xff : n & 0xff]; }
-
-function packI16(n) { return [(n >> 8) & 0xff, n & 0xff]; }
-function unpackI16(bytes) { return as_signed(bytes[0] << 8 | bytes[1], 16); }
-
-function packU16(n) { return [(n >> 8) & 0xff, n & 0xff]; }
-function unpackU16(bytes) { return as_unsigned(bytes[0] << 8 | bytes[1], 16); }
-
-function packI32(n) { return [(n >> 24) & 0xff, (n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff]; }
-function unpackI32(bytes) { return as_signed(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3], 32); }
-
-function packU32(n) { return [(n >> 24) & 0xff, (n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff]; }
-function unpackU32(bytes) { return as_unsigned(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3], 32); }
-
-function packIEEE754(v, ebits, fbits) {
-
-  var bias = (1 << (ebits - 1)) - 1,
-      s, e, f, ln,
-      i, bits, str, bytes;
-
-  function roundToEven(n) {
-    var w = floor(n), f = n - w;
-    if (f < 0.5)
-      return w;
-    if (f > 0.5)
-      return w + 1;
-    return w % 2 ? w + 1 : w;
-  }
-
-  // Compute sign, exponent, fraction
-  if (v !== v) {
-    // NaN
-    // http://dev.w3.org/2006/webapi/WebIDL/#es-type-mapping
-    e = (1 << ebits) - 1; f = pow(2, fbits - 1); s = 0;
-  } else if (v === Infinity || v === -Infinity) {
-    e = (1 << ebits) - 1; f = 0; s = (v < 0) ? 1 : 0;
-  } else if (v === 0) {
-    e = 0; f = 0; s = (1 / v === -Infinity) ? 1 : 0;
-  } else {
-    s = v < 0;
-    v = abs(v);
-
-    if (v >= pow(2, 1 - bias)) {
-      e = min(floor(log(v) / LN2), 1023);
-      f = roundToEven(v / pow(2, e) * pow(2, fbits));
-      if (f / pow(2, fbits) >= 2) {
-        e = e + 1;
-        f = 1;
-      }
-      if (e > bias) {
-        // Overflow
-        e = (1 << ebits) - 1;
-        f = 0;
-      } else {
-        // Normalized
-        e = e + bias;
-        f = f - pow(2, fbits);
-      }
-    } else {
-      // Denormalized
-      e = 0;
-      f = roundToEven(v / pow(2, 1 - bias - fbits));
-    }
-  }
-
-  // Pack sign, exponent, fraction
-  bits = [];
-  for (i = fbits; i; i -= 1) { bits.push(f % 2 ? 1 : 0); f = floor(f / 2); }
-  for (i = ebits; i; i -= 1) { bits.push(e % 2 ? 1 : 0); e = floor(e / 2); }
-  bits.push(s ? 1 : 0);
-  bits.reverse();
-  str = bits.join('');
-
-  // Bits to bytes
-  bytes = [];
-  while (str.length) {
-    bytes.push(parseInt(str.substring(0, 8), 2));
-    str = str.substring(8);
-  }
-  return bytes;
-}
-
-function unpackIEEE754(bytes, ebits, fbits) {
-
-  // Bytes to bits
-  var bits = [], i, j, b, str,
-      bias, s, e, f;
-
-  for (i = bytes.length; i; i -= 1) {
-    b = bytes[i - 1];
-    for (j = 8; j; j -= 1) {
-      bits.push(b % 2 ? 1 : 0); b = b >> 1;
-    }
-  }
-  bits.reverse();
-  str = bits.join('');
-
-  // Unpack sign, exponent, fraction
-  bias = (1 << (ebits - 1)) - 1;
-  s = parseInt(str.substring(0, 1), 2) ? -1 : 1;
-  e = parseInt(str.substring(1, 1 + ebits), 2);
-  f = parseInt(str.substring(1 + ebits), 2);
-
-  // Produce number
-  if (e === (1 << ebits) - 1) {
-    return f !== 0 ? NaN : s * Infinity;
-  } else if (e > 0) {
-    // Normalized
-    return s * pow(2, e - bias) * (1 + f / pow(2, fbits));
-  } else if (f !== 0) {
-    // Denormalized
-    return s * pow(2, -(bias - 1)) * (f / pow(2, fbits));
-  } else {
-    return s < 0 ? -0 : 0;
-  }
-}
-
-function unpackF64(b) { return unpackIEEE754(b, 11, 52); }
-function packF64(v) { return packIEEE754(v, 11, 52); }
-function unpackF32(b) { return unpackIEEE754(b, 8, 23); }
-function packF32(v) { return packIEEE754(v, 8, 23); }
-
-
-//
-// 3 The ArrayBuffer Type
-//
-
-(function() {
-
-  /** @constructor */
-  var ArrayBuffer = function ArrayBuffer(length) {
-    length = ECMAScript.ToInt32(length);
-    if (length < 0) throw new RangeError('ArrayBuffer size is not a small enough positive integer');
-
-    this.byteLength = length;
-    this._bytes = [];
-    this._bytes.length = length;
-
-    var i;
-    for (i = 0; i < this.byteLength; i += 1) {
-      this._bytes[i] = 0;
-    }
-
-    configureProperties(this);
-  };
-
-  exports.ArrayBuffer = exports.ArrayBuffer || ArrayBuffer;
-
-  //
-  // 4 The ArrayBufferView Type
-  //
-
-  // NOTE: this constructor is not exported
-  /** @constructor */
-  var ArrayBufferView = function ArrayBufferView() {
-    //this.buffer = null;
-    //this.byteOffset = 0;
-    //this.byteLength = 0;
-  };
-
-  //
-  // 5 The Typed Array View Types
-  //
-
-  function makeConstructor(bytesPerElement, pack, unpack) {
-    // Each TypedArray type requires a distinct constructor instance with
-    // identical logic, which this produces.
-
-    var ctor;
-    ctor = function(buffer, byteOffset, length) {
-      var array, sequence, i, s;
-
-      if (!arguments.length || typeof arguments[0] === 'number') {
-        // Constructor(unsigned long length)
-        this.length = ECMAScript.ToInt32(arguments[0]);
-        if (length < 0) throw new RangeError('ArrayBufferView size is not a small enough positive integer');
-
-        this.byteLength = this.length * this.BYTES_PER_ELEMENT;
-        this.buffer = new ArrayBuffer(this.byteLength);
-        this.byteOffset = 0;
-      } else if (typeof arguments[0] === 'object' && arguments[0].constructor === ctor) {
-        // Constructor(TypedArray array)
-        array = arguments[0];
-
-        this.length = array.length;
-        this.byteLength = this.length * this.BYTES_PER_ELEMENT;
-        this.buffer = new ArrayBuffer(this.byteLength);
-        this.byteOffset = 0;
-
-        for (i = 0; i < this.length; i += 1) {
-          this._setter(i, array._getter(i));
-        }
-      } else if (typeof arguments[0] === 'object' &&
-                 !(arguments[0] instanceof ArrayBuffer || ECMAScript.Class(arguments[0]) === 'ArrayBuffer')) {
-        // Constructor(sequence<type> array)
-        sequence = arguments[0];
-
-        this.length = ECMAScript.ToUint32(sequence.length);
-        this.byteLength = this.length * this.BYTES_PER_ELEMENT;
-        this.buffer = new ArrayBuffer(this.byteLength);
-        this.byteOffset = 0;
-
-        for (i = 0; i < this.length; i += 1) {
-          s = sequence[i];
-          this._setter(i, Number(s));
-        }
-      } else if (typeof arguments[0] === 'object' &&
-                 (arguments[0] instanceof ArrayBuffer || ECMAScript.Class(arguments[0]) === 'ArrayBuffer')) {
-        // Constructor(ArrayBuffer buffer,
-        //             optional unsigned long byteOffset, optional unsigned long length)
-        this.buffer = buffer;
-
-        this.byteOffset = ECMAScript.ToUint32(byteOffset);
-        if (this.byteOffset > this.buffer.byteLength) {
-          throw new RangeError("byteOffset out of range");
-        }
-
-        if (this.byteOffset % this.BYTES_PER_ELEMENT) {
-          // The given byteOffset must be a multiple of the element
-          // size of the specific type, otherwise an exception is raised.
-          throw new RangeError("ArrayBuffer length minus the byteOffset is not a multiple of the element size.");
-        }
-
-        if (arguments.length < 3) {
-          this.byteLength = this.buffer.byteLength - this.byteOffset;
-
-          if (this.byteLength % this.BYTES_PER_ELEMENT) {
-            throw new RangeError("length of buffer minus byteOffset not a multiple of the element size");
-          }
-          this.length = this.byteLength / this.BYTES_PER_ELEMENT;
-        } else {
-          this.length = ECMAScript.ToUint32(length);
-          this.byteLength = this.length * this.BYTES_PER_ELEMENT;
-        }
-
-        if ((this.byteOffset + this.byteLength) > this.buffer.byteLength) {
-          throw new RangeError("byteOffset and length reference an area beyond the end of the buffer");
-        }
-      } else {
-        throw new TypeError("Unexpected argument type(s)");
-      }
-
-      this.constructor = ctor;
-
-      configureProperties(this);
-      makeArrayAccessors(this);
-    };
-
-    ctor.prototype = new ArrayBufferView();
-    ctor.prototype.BYTES_PER_ELEMENT = bytesPerElement;
-    ctor.prototype._pack = pack;
-    ctor.prototype._unpack = unpack;
-    ctor.BYTES_PER_ELEMENT = bytesPerElement;
-
-    // getter type (unsigned long index);
-    ctor.prototype._getter = function(index) {
-      if (arguments.length < 1) throw new SyntaxError("Not enough arguments");
-
-      index = ECMAScript.ToUint32(index);
-      if (index >= this.length) {
-        return undefined;
-      }
-
-      var bytes = [], i, o;
-      for (i = 0, o = this.byteOffset + index * this.BYTES_PER_ELEMENT;
-           i < this.BYTES_PER_ELEMENT;
-           i += 1, o += 1) {
-        bytes.push(this.buffer._bytes[o]);
-      }
-      return this._unpack(bytes);
-    };
-
-    // NONSTANDARD: convenience alias for getter: type get(unsigned long index);
-    ctor.prototype.get = ctor.prototype._getter;
-
-    // setter void (unsigned long index, type value);
-    ctor.prototype._setter = function(index, value) {
-      if (arguments.length < 2) throw new SyntaxError("Not enough arguments");
-
-      index = ECMAScript.ToUint32(index);
-      if (index >= this.length) {
-        return undefined;
-      }
-
-      var bytes = this._pack(value), i, o;
-      for (i = 0, o = this.byteOffset + index * this.BYTES_PER_ELEMENT;
-           i < this.BYTES_PER_ELEMENT;
-           i += 1, o += 1) {
-        this.buffer._bytes[o] = bytes[i];
-      }
-    };
-
-    // void set(TypedArray array, optional unsigned long offset);
-    // void set(sequence<type> array, optional unsigned long offset);
-    ctor.prototype.set = function(index, value) {
-      if (arguments.length < 1) throw new SyntaxError("Not enough arguments");
-      var array, sequence, offset, len,
-          i, s, d,
-          byteOffset, byteLength, tmp;
-
-      if (typeof arguments[0] === 'object' && arguments[0].constructor === this.constructor) {
-        // void set(TypedArray array, optional unsigned long offset);
-        array = arguments[0];
-        offset = ECMAScript.ToUint32(arguments[1]);
-
-        if (offset + array.length > this.length) {
-          throw new RangeError("Offset plus length of array is out of range");
-        }
-
-        byteOffset = this.byteOffset + offset * this.BYTES_PER_ELEMENT;
-        byteLength = array.length * this.BYTES_PER_ELEMENT;
-
-        if (array.buffer === this.buffer) {
-          tmp = [];
-          for (i = 0, s = array.byteOffset; i < byteLength; i += 1, s += 1) {
-            tmp[i] = array.buffer._bytes[s];
-          }
-          for (i = 0, d = byteOffset; i < byteLength; i += 1, d += 1) {
-            this.buffer._bytes[d] = tmp[i];
-          }
-        } else {
-          for (i = 0, s = array.byteOffset, d = byteOffset;
-               i < byteLength; i += 1, s += 1, d += 1) {
-            this.buffer._bytes[d] = array.buffer._bytes[s];
-          }
-        }
-      } else if (typeof arguments[0] === 'object' && typeof arguments[0].length !== 'undefined') {
-        // void set(sequence<type> array, optional unsigned long offset);
-        sequence = arguments[0];
-        len = ECMAScript.ToUint32(sequence.length);
-        offset = ECMAScript.ToUint32(arguments[1]);
-
-        if (offset + len > this.length) {
-          throw new RangeError("Offset plus length of array is out of range");
-        }
-
-        for (i = 0; i < len; i += 1) {
-          s = sequence[i];
-          this._setter(offset + i, Number(s));
-        }
-      } else {
-        throw new TypeError("Unexpected argument type(s)");
-      }
-    };
-
-    // TypedArray subarray(long begin, optional long end);
-    ctor.prototype.subarray = function(start, end) {
-      function clamp(v, min, max) { return v < min ? min : v > max ? max : v; }
-
-      start = ECMAScript.ToInt32(start);
-      end = ECMAScript.ToInt32(end);
-
-      if (arguments.length < 1) { start = 0; }
-      if (arguments.length < 2) { end = this.length; }
-
-      if (start < 0) { start = this.length + start; }
-      if (end < 0) { end = this.length + end; }
-
-      start = clamp(start, 0, this.length);
-      end = clamp(end, 0, this.length);
-
-      var len = end - start;
-      if (len < 0) {
-        len = 0;
-      }
-
-      return new this.constructor(
-        this.buffer, this.byteOffset + start * this.BYTES_PER_ELEMENT, len);
-    };
-
-    return ctor;
-  }
-
-  var Int8Array = makeConstructor(1, packI8, unpackI8);
-  var Uint8Array = makeConstructor(1, packU8, unpackU8);
-  var Uint8ClampedArray = makeConstructor(1, packU8Clamped, unpackU8);
-  var Int16Array = makeConstructor(2, packI16, unpackI16);
-  var Uint16Array = makeConstructor(2, packU16, unpackU16);
-  var Int32Array = makeConstructor(4, packI32, unpackI32);
-  var Uint32Array = makeConstructor(4, packU32, unpackU32);
-  var Float32Array = makeConstructor(4, packF32, unpackF32);
-  var Float64Array = makeConstructor(8, packF64, unpackF64);
-
-  exports.Int8Array = exports.Int8Array || Int8Array;
-  exports.Uint8Array = exports.Uint8Array || Uint8Array;
-  exports.Uint8ClampedArray = exports.Uint8ClampedArray || Uint8ClampedArray;
-  exports.Int16Array = exports.Int16Array || Int16Array;
-  exports.Uint16Array = exports.Uint16Array || Uint16Array;
-  exports.Int32Array = exports.Int32Array || Int32Array;
-  exports.Uint32Array = exports.Uint32Array || Uint32Array;
-  exports.Float32Array = exports.Float32Array || Float32Array;
-  exports.Float64Array = exports.Float64Array || Float64Array;
-}());
-
-//
-// 6 The DataView View Type
-//
-
-(function() {
-  function r(array, index) {
-    return ECMAScript.IsCallable(array.get) ? array.get(index) : array[index];
-  }
-
-  var IS_BIG_ENDIAN = (function() {
-    var u16array = new(exports.Uint16Array)([0x1234]),
-        u8array = new(exports.Uint8Array)(u16array.buffer);
-    return r(u8array, 0) === 0x12;
-  }());
-
-  // Constructor(ArrayBuffer buffer,
-  //             optional unsigned long byteOffset,
-  //             optional unsigned long byteLength)
-  /** @constructor */
-  var DataView = function DataView(buffer, byteOffset, byteLength) {
-    if (arguments.length === 0) {
-      buffer = new exports.ArrayBuffer(0);
-    } else if (!(buffer instanceof exports.ArrayBuffer || ECMAScript.Class(buffer) === 'ArrayBuffer')) {
-      throw new TypeError("TypeError");
-    }
-
-    this.buffer = buffer || new exports.ArrayBuffer(0);
-
-    this.byteOffset = ECMAScript.ToUint32(byteOffset);
-    if (this.byteOffset > this.buffer.byteLength) {
-      throw new RangeError("byteOffset out of range");
-    }
-
-    if (arguments.length < 3) {
-      this.byteLength = this.buffer.byteLength - this.byteOffset;
-    } else {
-      this.byteLength = ECMAScript.ToUint32(byteLength);
-    }
-
-    if ((this.byteOffset + this.byteLength) > this.buffer.byteLength) {
-      throw new RangeError("byteOffset and length reference an area beyond the end of the buffer");
-    }
-
-    configureProperties(this);
-  };
-
-  function makeGetter(arrayType) {
-    return function(byteOffset, littleEndian) {
-
-      byteOffset = ECMAScript.ToUint32(byteOffset);
-
-      if (byteOffset + arrayType.BYTES_PER_ELEMENT > this.byteLength) {
-        throw new RangeError("Array index out of range");
-      }
-      byteOffset += this.byteOffset;
-
-      var uint8Array = new exports.Uint8Array(this.buffer, byteOffset, arrayType.BYTES_PER_ELEMENT),
-          bytes = [], i;
-      for (i = 0; i < arrayType.BYTES_PER_ELEMENT; i += 1) {
-        bytes.push(r(uint8Array, i));
-      }
-
-      if (Boolean(littleEndian) === Boolean(IS_BIG_ENDIAN)) {
-        bytes.reverse();
-      }
-
-      return r(new arrayType(new exports.Uint8Array(bytes).buffer), 0);
-    };
-  }
-
-  DataView.prototype.getUint8 = makeGetter(exports.Uint8Array);
-  DataView.prototype.getInt8 = makeGetter(exports.Int8Array);
-  DataView.prototype.getUint16 = makeGetter(exports.Uint16Array);
-  DataView.prototype.getInt16 = makeGetter(exports.Int16Array);
-  DataView.prototype.getUint32 = makeGetter(exports.Uint32Array);
-  DataView.prototype.getInt32 = makeGetter(exports.Int32Array);
-  DataView.prototype.getFloat32 = makeGetter(exports.Float32Array);
-  DataView.prototype.getFloat64 = makeGetter(exports.Float64Array);
-
-  function makeSetter(arrayType) {
-    return function(byteOffset, value, littleEndian) {
-
-      byteOffset = ECMAScript.ToUint32(byteOffset);
-      if (byteOffset + arrayType.BYTES_PER_ELEMENT > this.byteLength) {
-        throw new RangeError("Array index out of range");
-      }
-
-      // Get bytes
-      var typeArray = new arrayType([value]),
-          byteArray = new exports.Uint8Array(typeArray.buffer),
-          bytes = [], i, byteView;
-
-      for (i = 0; i < arrayType.BYTES_PER_ELEMENT; i += 1) {
-        bytes.push(r(byteArray, i));
-      }
-
-      // Flip if necessary
-      if (Boolean(littleEndian) === Boolean(IS_BIG_ENDIAN)) {
-        bytes.reverse();
-      }
-
-      // Write them
-      byteView = new exports.Uint8Array(this.buffer, byteOffset, arrayType.BYTES_PER_ELEMENT);
-      byteView.set(bytes);
-    };
-  }
-
-  DataView.prototype.setUint8 = makeSetter(exports.Uint8Array);
-  DataView.prototype.setInt8 = makeSetter(exports.Int8Array);
-  DataView.prototype.setUint16 = makeSetter(exports.Uint16Array);
-  DataView.prototype.setInt16 = makeSetter(exports.Int16Array);
-  DataView.prototype.setUint32 = makeSetter(exports.Uint32Array);
-  DataView.prototype.setInt32 = makeSetter(exports.Int32Array);
-  DataView.prototype.setFloat32 = makeSetter(exports.Float32Array);
-  DataView.prototype.setFloat64 = makeSetter(exports.Float64Array);
-
-  exports.DataView = exports.DataView || DataView;
-
-}());
+},{"max-safe-integer":73}],73:[function(require,module,exports){
+'use strict';
+module.exports = 9007199254740991;
 
 },{}],74:[function(require,module,exports){
+"use strict"
+
+var doubleBits = require("double-bits")
+
+var SMALLEST_DENORM = Math.pow(2, -1074)
+var UINT_MAX = (-1)>>>0
+
+module.exports = nextafter
+
+function nextafter(x, y) {
+  if(isNaN(x) || isNaN(y)) {
+    return NaN
+  }
+  if(x === y) {
+    return x
+  }
+  if(x === 0) {
+    if(y < 0) {
+      return -SMALLEST_DENORM
+    } else {
+      return SMALLEST_DENORM
+    }
+  }
+  var hi = doubleBits.hi(x)
+  var lo = doubleBits.lo(x)
+  if((y > x) === (x > 0)) {
+    if(lo === UINT_MAX) {
+      hi += 1
+      lo = 0
+    } else {
+      lo += 1
+    }
+  } else {
+    if(lo === 0) {
+      lo = UINT_MAX
+      hi -= 1
+    } else {
+      lo -= 1
+    }
+  }
+  return doubleBits.pack(lo, hi)
+}
+},{"double-bits":75}],75:[function(require,module,exports){
+(function (Buffer){
+var hasTypedArrays = false
+if(typeof Float64Array !== "undefined") {
+  var DOUBLE_VIEW = new Float64Array(1)
+    , UINT_VIEW   = new Uint32Array(DOUBLE_VIEW.buffer)
+  DOUBLE_VIEW[0] = 1.0
+  hasTypedArrays = true
+  if(UINT_VIEW[1] === 0x3ff00000) {
+    //Use little endian
+    module.exports = function doubleBitsLE(n) {
+      DOUBLE_VIEW[0] = n
+      return [ UINT_VIEW[0], UINT_VIEW[1] ]
+    }
+    function toDoubleLE(lo, hi) {
+      UINT_VIEW[0] = lo
+      UINT_VIEW[1] = hi
+      return DOUBLE_VIEW[0]
+    }
+    module.exports.pack = toDoubleLE
+    function lowUintLE(n) {
+      DOUBLE_VIEW[0] = n
+      return UINT_VIEW[0]
+    }
+    module.exports.lo = lowUintLE
+    function highUintLE(n) {
+      DOUBLE_VIEW[0] = n
+      return UINT_VIEW[1]
+    }
+    module.exports.hi = highUintLE
+  } else if(UINT_VIEW[0] === 0x3ff00000) {
+    //Use big endian
+    module.exports = function doubleBitsBE(n) {
+      DOUBLE_VIEW[0] = n
+      return [ UINT_VIEW[1], UINT_VIEW[0] ]
+    }
+    function toDoubleBE(lo, hi) {
+      UINT_VIEW[1] = lo
+      UINT_VIEW[0] = hi
+      return DOUBLE_VIEW[0]
+    }
+    module.exports.pack = toDoubleBE
+    function lowUintBE(n) {
+      DOUBLE_VIEW[0] = n
+      return UINT_VIEW[1]
+    }
+    module.exports.lo = lowUintBE
+    function highUintBE(n) {
+      DOUBLE_VIEW[0] = n
+      return UINT_VIEW[0]
+    }
+    module.exports.hi = highUintBE
+  } else {
+    hasTypedArrays = false
+  }
+}
+if(!hasTypedArrays) {
+  var buffer = new Buffer(8)
+  module.exports = function doubleBits(n) {
+    buffer.writeDoubleLE(n, 0, true)
+    return [ buffer.readUInt32LE(0, true), buffer.readUInt32LE(4, true) ]
+  }
+  function toDouble(lo, hi) {
+    buffer.writeUInt32LE(lo, 0, true)
+    buffer.writeUInt32LE(hi, 4, true)
+    return buffer.readDoubleLE(0, true)
+  }
+  module.exports.pack = toDouble  
+  function lowUint(n) {
+    buffer.writeDoubleLE(n, 0, true)
+    return buffer.readUInt32LE(0, true)
+  }
+  module.exports.lo = lowUint
+  function highUint(n) {
+    buffer.writeDoubleLE(n, 0, true)
+    return buffer.readUInt32LE(4, true)
+  }
+  module.exports.hi = highUint
+}
+
+module.exports.sign = function(n) {
+  return module.exports.hi(n) >>> 31
+}
+
+module.exports.exponent = function(n) {
+  var b = module.exports.hi(n)
+  return ((b<<1) >>> 21) - 1023
+}
+
+module.exports.fraction = function(n) {
+  var lo = module.exports.lo(n)
+  var hi = module.exports.hi(n)
+  var b = hi & ((1<<20) - 1)
+  if(hi & 0x7ff00000) {
+    b += (1<<20)
+  }
+  return [lo, b]
+}
+
+module.exports.denormalized = function(n) {
+  var hi = module.exports.hi(n)
+  return !(hi & 0x7ff00000)
+}
+}).call(this,require("buffer").Buffer)
+},{"buffer":114}],76:[function(require,module,exports){
+module.exports = extend
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+function extend(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i]
+
+        for (var key in source) {
+            if (hasOwnProperty.call(source, key)) {
+                target[key] = source[key]
+            }
+        }
+    }
+
+    return target
+}
+
+},{}],77:[function(require,module,exports){
 module.exports=require(25)
-},{"./lib/CodeGenerator":75}],75:[function(require,module,exports){
+},{"./lib/CodeGenerator":78}],78:[function(require,module,exports){
 module.exports=require(26)
-},{"./Interpreter":76,"extend":54,"mr-parser":87}],76:[function(require,module,exports){
+},{"./Interpreter":79,"extend":54,"mr-parser":90}],79:[function(require,module,exports){
 module.exports=require(27)
-},{"./node/ArrayNode":79,"./node/AssignmentNode":80,"./node/ConditionalNode":81,"./node/ConstantNode":82,"./node/FunctionNode":83,"./node/OperatorNode":84,"./node/SymbolNode":85,"./node/UnaryNode":86,"extend":54}],77:[function(require,module,exports){
+},{"./node/ArrayNode":82,"./node/AssignmentNode":83,"./node/ConditionalNode":84,"./node/ConstantNode":85,"./node/FunctionNode":86,"./node/OperatorNode":87,"./node/SymbolNode":88,"./node/UnaryNode":89,"extend":54}],80:[function(require,module,exports){
 module.exports=require(28)
-},{}],78:[function(require,module,exports){
-module.exports=require(29)
-},{}],79:[function(require,module,exports){
-module.exports=require(30)
-},{}],80:[function(require,module,exports){
-module.exports=require(31)
 },{}],81:[function(require,module,exports){
-module.exports=require(32)
+module.exports=require(29)
 },{}],82:[function(require,module,exports){
-module.exports=require(33)
+module.exports=require(30)
 },{}],83:[function(require,module,exports){
-module.exports=require(34)
-},{"mr-parser":87}],84:[function(require,module,exports){
-module.exports=require(35)
-},{"../misc/Operators":77}],85:[function(require,module,exports){
-module.exports=require(36)
+module.exports=require(31)
+},{}],84:[function(require,module,exports){
+module.exports=require(32)
+},{}],85:[function(require,module,exports){
+module.exports=require(33)
 },{}],86:[function(require,module,exports){
+module.exports=require(34)
+},{"mr-parser":90}],87:[function(require,module,exports){
+module.exports=require(35)
+},{"../misc/Operators":80}],88:[function(require,module,exports){
+module.exports=require(36)
+},{}],89:[function(require,module,exports){
 module.exports=require(37)
-},{"../misc/UnaryOperators":78}],87:[function(require,module,exports){
+},{"../misc/UnaryOperators":81}],90:[function(require,module,exports){
 module.exports=require(38)
-},{"./lib/Lexer":88,"./lib/Parser":89,"./lib/node/":100}],88:[function(require,module,exports){
+},{"./lib/Lexer":91,"./lib/Parser":92,"./lib/node/":103}],91:[function(require,module,exports){
 module.exports=require(39)
-},{"./token-type":101}],89:[function(require,module,exports){
+},{"./token-type":104}],92:[function(require,module,exports){
 module.exports=require(40)
-},{"./Lexer":88,"./node/ArrayNode":90,"./node/AssignmentNode":91,"./node/BlockNode":92,"./node/ConditionalNode":93,"./node/ConstantNode":94,"./node/FunctionNode":95,"./node/OperatorNode":97,"./node/SymbolNode":98,"./node/UnaryNode":99,"./token-type":101}],90:[function(require,module,exports){
+},{"./Lexer":91,"./node/ArrayNode":93,"./node/AssignmentNode":94,"./node/BlockNode":95,"./node/ConditionalNode":96,"./node/ConstantNode":97,"./node/FunctionNode":98,"./node/OperatorNode":100,"./node/SymbolNode":101,"./node/UnaryNode":102,"./token-type":104}],93:[function(require,module,exports){
 module.exports=require(41)
-},{"./Node":96}],91:[function(require,module,exports){
+},{"./Node":99}],94:[function(require,module,exports){
 module.exports=require(42)
-},{"./Node":96}],92:[function(require,module,exports){
+},{"./Node":99}],95:[function(require,module,exports){
 module.exports=require(43)
-},{"./Node":96}],93:[function(require,module,exports){
+},{"./Node":99}],96:[function(require,module,exports){
 module.exports=require(44)
-},{"./Node":96}],94:[function(require,module,exports){
+},{"./Node":99}],97:[function(require,module,exports){
 module.exports=require(45)
-},{"./Node":96}],95:[function(require,module,exports){
+},{"./Node":99}],98:[function(require,module,exports){
 module.exports=require(46)
-},{"./Node":96}],96:[function(require,module,exports){
+},{"./Node":99}],99:[function(require,module,exports){
 module.exports=require(47)
-},{}],97:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 module.exports=require(48)
-},{"./Node":96}],98:[function(require,module,exports){
+},{"./Node":99}],101:[function(require,module,exports){
 module.exports=require(49)
-},{"./Node":96}],99:[function(require,module,exports){
+},{"./Node":99}],102:[function(require,module,exports){
 module.exports=require(50)
-},{"./Node":96}],100:[function(require,module,exports){
+},{"./Node":99}],103:[function(require,module,exports){
 module.exports=require(51)
-},{"./ArrayNode":90,"./AssignmentNode":91,"./BlockNode":92,"./ConditionalNode":93,"./ConstantNode":94,"./FunctionNode":95,"./Node":96,"./OperatorNode":97,"./SymbolNode":98,"./UnaryNode":99}],101:[function(require,module,exports){
+},{"./ArrayNode":93,"./AssignmentNode":94,"./BlockNode":95,"./ConditionalNode":96,"./ConstantNode":97,"./FunctionNode":98,"./Node":99,"./OperatorNode":100,"./SymbolNode":101,"./UnaryNode":102}],104:[function(require,module,exports){
 module.exports=require(52)
-},{}],102:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],103:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 (function (process){
 var keys = require('vkey')
 var list = Object.keys(keys)
@@ -5654,7 +5273,7 @@ function keydown(e) {
 }
 
 }).call(this,require('_process'))
-},{"_process":108,"vkey":104}],104:[function(require,module,exports){
+},{"_process":118,"vkey":107}],107:[function(require,module,exports){
 var ua = typeof window !== 'undefined' ? window.navigator.userAgent : ''
   , isOSX = /OS X/.test(ua)
   , isOpera = /Opera/.test(ua)
@@ -5792,7 +5411,7 @@ for(i = 112; i < 136; ++i) {
   output[i] = 'F'+(i-111)
 }
 
-},{}],105:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 var Emitter = require('events').EventEmitter
 var vkey = require('vkey')
 
@@ -5832,9 +5451,1438 @@ module.exports = function(keys, el) {
   return emitter
 }
 
-},{"events":107,"vkey":106}],106:[function(require,module,exports){
-module.exports=require(104)
-},{}],107:[function(require,module,exports){
+},{"events":117,"vkey":109}],109:[function(require,module,exports){
+module.exports=require(107)
+},{}],110:[function(require,module,exports){
+var integers = require('integers');
+
+module.exports = function linspace(a,b,n) {
+  var every = (b-a)/(n-1),
+      ranged = integers(a,b,every);
+
+  return ranged.length == n ? ranged : ranged.concat(b);
+}
+
+},{"integers":111}],111:[function(require,module,exports){
+module.exports = function () {
+  var from = 0,
+      to = 0,
+      every = 1,
+      output = [];
+
+  switch(arguments.length) {
+    case 1:
+      to = arguments[0];
+      break;
+
+    case 3:
+      every = arguments[2];
+    case 2:
+      from = arguments[0];
+      to = arguments[1];
+      break;
+  }
+
+  for (i=from; i < to; i+=every) {
+    output.push(i);
+  }
+
+  return output;
+}
+
+},{}],112:[function(require,module,exports){
+'use strict';
+module.exports = Math.log10 || function (x) {
+	return Math.log(x) * Math.LOG10E;
+};
+
+},{}],113:[function(require,module,exports){
+var linspace = require('linspace');
+
+module.exports = function logspace(a,b,n) {
+  return linspace(a,b,n).map(function(x) { return Math.pow(10,x); });
+}
+
+},{"linspace":110}],114:[function(require,module,exports){
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+
+var base64 = require('base64-js')
+var ieee754 = require('ieee754')
+
+exports.Buffer = Buffer
+exports.SlowBuffer = Buffer
+exports.INSPECT_MAX_BYTES = 50
+Buffer.poolSize = 8192
+
+/**
+ * If `TYPED_ARRAY_SUPPORT`:
+ *   === true    Use Uint8Array implementation (fastest)
+ *   === false   Use Object implementation (most compatible, even IE6)
+ *
+ * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+ * Opera 11.6+, iOS 4.2+.
+ *
+ * Note:
+ *
+ * - Implementation must support adding new properties to `Uint8Array` instances.
+ *   Firefox 4-29 lacked support, fixed in Firefox 30+.
+ *   See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *
+ *  - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *
+ *  - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *    incorrect length in some situations.
+ *
+ * We detect these buggy browsers and set `TYPED_ARRAY_SUPPORT` to `false` so they will
+ * get the Object implementation, which is slower but will work correctly.
+ */
+var TYPED_ARRAY_SUPPORT = (function () {
+  try {
+    var buf = new ArrayBuffer(0)
+    var arr = new Uint8Array(buf)
+    arr.foo = function () { return 42 }
+    return 42 === arr.foo() && // typed array instances can be augmented
+        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+        new Uint8Array(1).subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
+  } catch (e) {
+    return false
+  }
+})()
+
+/**
+ * Class: Buffer
+ * =============
+ *
+ * The Buffer constructor returns instances of `Uint8Array` that are augmented
+ * with function properties for all the node `Buffer` API functions. We use
+ * `Uint8Array` so that square bracket notation works as expected -- it returns
+ * a single octet.
+ *
+ * By augmenting the instances, we can avoid modifying the `Uint8Array`
+ * prototype.
+ */
+function Buffer (subject, encoding, noZero) {
+  if (!(this instanceof Buffer))
+    return new Buffer(subject, encoding, noZero)
+
+  var type = typeof subject
+
+  // Find the length
+  var length
+  if (type === 'number')
+    length = subject > 0 ? subject >>> 0 : 0
+  else if (type === 'string') {
+    if (encoding === 'base64')
+      subject = base64clean(subject)
+    length = Buffer.byteLength(subject, encoding)
+  } else if (type === 'object' && subject !== null) { // assume object is array-like
+    if (subject.type === 'Buffer' && isArray(subject.data))
+      subject = subject.data
+    length = +subject.length > 0 ? Math.floor(+subject.length) : 0
+  } else
+    throw new Error('First argument needs to be a number, array or string.')
+
+  var buf
+  if (TYPED_ARRAY_SUPPORT) {
+    // Preferred: Return an augmented `Uint8Array` instance for best performance
+    buf = Buffer._augment(new Uint8Array(length))
+  } else {
+    // Fallback: Return THIS instance of Buffer (created by `new`)
+    buf = this
+    buf.length = length
+    buf._isBuffer = true
+  }
+
+  var i
+  if (TYPED_ARRAY_SUPPORT && typeof subject.byteLength === 'number') {
+    // Speed optimization -- use set if we're copying from a typed array
+    buf._set(subject)
+  } else if (isArrayish(subject)) {
+    // Treat array-ish objects as a byte array
+    if (Buffer.isBuffer(subject)) {
+      for (i = 0; i < length; i++)
+        buf[i] = subject.readUInt8(i)
+    } else {
+      for (i = 0; i < length; i++)
+        buf[i] = ((subject[i] % 256) + 256) % 256
+    }
+  } else if (type === 'string') {
+    buf.write(subject, 0, encoding)
+  } else if (type === 'number' && !TYPED_ARRAY_SUPPORT && !noZero) {
+    for (i = 0; i < length; i++) {
+      buf[i] = 0
+    }
+  }
+
+  return buf
+}
+
+// STATIC METHODS
+// ==============
+
+Buffer.isEncoding = function (encoding) {
+  switch (String(encoding).toLowerCase()) {
+    case 'hex':
+    case 'utf8':
+    case 'utf-8':
+    case 'ascii':
+    case 'binary':
+    case 'base64':
+    case 'raw':
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      return true
+    default:
+      return false
+  }
+}
+
+Buffer.isBuffer = function (b) {
+  return !!(b != null && b._isBuffer)
+}
+
+Buffer.byteLength = function (str, encoding) {
+  var ret
+  str = str.toString()
+  switch (encoding || 'utf8') {
+    case 'hex':
+      ret = str.length / 2
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = utf8ToBytes(str).length
+      break
+    case 'ascii':
+    case 'binary':
+    case 'raw':
+      ret = str.length
+      break
+    case 'base64':
+      ret = base64ToBytes(str).length
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = str.length * 2
+      break
+    default:
+      throw new Error('Unknown encoding')
+  }
+  return ret
+}
+
+Buffer.concat = function (list, totalLength) {
+  assert(isArray(list), 'Usage: Buffer.concat(list[, length])')
+
+  if (list.length === 0) {
+    return new Buffer(0)
+  } else if (list.length === 1) {
+    return list[0]
+  }
+
+  var i
+  if (totalLength === undefined) {
+    totalLength = 0
+    for (i = 0; i < list.length; i++) {
+      totalLength += list[i].length
+    }
+  }
+
+  var buf = new Buffer(totalLength)
+  var pos = 0
+  for (i = 0; i < list.length; i++) {
+    var item = list[i]
+    item.copy(buf, pos)
+    pos += item.length
+  }
+  return buf
+}
+
+Buffer.compare = function (a, b) {
+  assert(Buffer.isBuffer(a) && Buffer.isBuffer(b), 'Arguments must be Buffers')
+  var x = a.length
+  var y = b.length
+  for (var i = 0, len = Math.min(x, y); i < len && a[i] === b[i]; i++) {}
+  if (i !== len) {
+    x = a[i]
+    y = b[i]
+  }
+  if (x < y) {
+    return -1
+  }
+  if (y < x) {
+    return 1
+  }
+  return 0
+}
+
+// BUFFER INSTANCE METHODS
+// =======================
+
+function hexWrite (buf, string, offset, length) {
+  offset = Number(offset) || 0
+  var remaining = buf.length - offset
+  if (!length) {
+    length = remaining
+  } else {
+    length = Number(length)
+    if (length > remaining) {
+      length = remaining
+    }
+  }
+
+  // must be an even number of digits
+  var strLen = string.length
+  assert(strLen % 2 === 0, 'Invalid hex string')
+
+  if (length > strLen / 2) {
+    length = strLen / 2
+  }
+  for (var i = 0; i < length; i++) {
+    var byte = parseInt(string.substr(i * 2, 2), 16)
+    assert(!isNaN(byte), 'Invalid hex string')
+    buf[offset + i] = byte
+  }
+  return i
+}
+
+function utf8Write (buf, string, offset, length) {
+  var charsWritten = blitBuffer(utf8ToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+function asciiWrite (buf, string, offset, length) {
+  var charsWritten = blitBuffer(asciiToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+function binaryWrite (buf, string, offset, length) {
+  return asciiWrite(buf, string, offset, length)
+}
+
+function base64Write (buf, string, offset, length) {
+  var charsWritten = blitBuffer(base64ToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+function utf16leWrite (buf, string, offset, length) {
+  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length)
+  return charsWritten
+}
+
+Buffer.prototype.write = function (string, offset, length, encoding) {
+  // Support both (string, offset, length, encoding)
+  // and the legacy (string, encoding, offset, length)
+  if (isFinite(offset)) {
+    if (!isFinite(length)) {
+      encoding = length
+      length = undefined
+    }
+  } else {  // legacy
+    var swap = encoding
+    encoding = offset
+    offset = length
+    length = swap
+  }
+
+  offset = Number(offset) || 0
+  var remaining = this.length - offset
+  if (!length) {
+    length = remaining
+  } else {
+    length = Number(length)
+    if (length > remaining) {
+      length = remaining
+    }
+  }
+  encoding = String(encoding || 'utf8').toLowerCase()
+
+  var ret
+  switch (encoding) {
+    case 'hex':
+      ret = hexWrite(this, string, offset, length)
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = utf8Write(this, string, offset, length)
+      break
+    case 'ascii':
+      ret = asciiWrite(this, string, offset, length)
+      break
+    case 'binary':
+      ret = binaryWrite(this, string, offset, length)
+      break
+    case 'base64':
+      ret = base64Write(this, string, offset, length)
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = utf16leWrite(this, string, offset, length)
+      break
+    default:
+      throw new Error('Unknown encoding')
+  }
+  return ret
+}
+
+Buffer.prototype.toString = function (encoding, start, end) {
+  var self = this
+
+  encoding = String(encoding || 'utf8').toLowerCase()
+  start = Number(start) || 0
+  end = (end === undefined) ? self.length : Number(end)
+
+  // Fastpath empty strings
+  if (end === start)
+    return ''
+
+  var ret
+  switch (encoding) {
+    case 'hex':
+      ret = hexSlice(self, start, end)
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = utf8Slice(self, start, end)
+      break
+    case 'ascii':
+      ret = asciiSlice(self, start, end)
+      break
+    case 'binary':
+      ret = binarySlice(self, start, end)
+      break
+    case 'base64':
+      ret = base64Slice(self, start, end)
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = utf16leSlice(self, start, end)
+      break
+    default:
+      throw new Error('Unknown encoding')
+  }
+  return ret
+}
+
+Buffer.prototype.toJSON = function () {
+  return {
+    type: 'Buffer',
+    data: Array.prototype.slice.call(this._arr || this, 0)
+  }
+}
+
+Buffer.prototype.equals = function (b) {
+  assert(Buffer.isBuffer(b), 'Argument must be a Buffer')
+  return Buffer.compare(this, b) === 0
+}
+
+Buffer.prototype.compare = function (b) {
+  assert(Buffer.isBuffer(b), 'Argument must be a Buffer')
+  return Buffer.compare(this, b)
+}
+
+// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+Buffer.prototype.copy = function (target, target_start, start, end) {
+  var source = this
+
+  if (!start) start = 0
+  if (!end && end !== 0) end = this.length
+  if (!target_start) target_start = 0
+
+  // Copy 0 bytes; we're done
+  if (end === start) return
+  if (target.length === 0 || source.length === 0) return
+
+  // Fatal error conditions
+  assert(end >= start, 'sourceEnd < sourceStart')
+  assert(target_start >= 0 && target_start < target.length,
+      'targetStart out of bounds')
+  assert(start >= 0 && start < source.length, 'sourceStart out of bounds')
+  assert(end >= 0 && end <= source.length, 'sourceEnd out of bounds')
+
+  // Are we oob?
+  if (end > this.length)
+    end = this.length
+  if (target.length - target_start < end - start)
+    end = target.length - target_start + start
+
+  var len = end - start
+
+  if (len < 100 || !TYPED_ARRAY_SUPPORT) {
+    for (var i = 0; i < len; i++) {
+      target[i + target_start] = this[i + start]
+    }
+  } else {
+    target._set(this.subarray(start, start + len), target_start)
+  }
+}
+
+function base64Slice (buf, start, end) {
+  if (start === 0 && end === buf.length) {
+    return base64.fromByteArray(buf)
+  } else {
+    return base64.fromByteArray(buf.slice(start, end))
+  }
+}
+
+function utf8Slice (buf, start, end) {
+  var res = ''
+  var tmp = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++) {
+    if (buf[i] <= 0x7F) {
+      res += decodeUtf8Char(tmp) + String.fromCharCode(buf[i])
+      tmp = ''
+    } else {
+      tmp += '%' + buf[i].toString(16)
+    }
+  }
+
+  return res + decodeUtf8Char(tmp)
+}
+
+function asciiSlice (buf, start, end) {
+  var ret = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++) {
+    ret += String.fromCharCode(buf[i])
+  }
+  return ret
+}
+
+function binarySlice (buf, start, end) {
+  return asciiSlice(buf, start, end)
+}
+
+function hexSlice (buf, start, end) {
+  var len = buf.length
+
+  if (!start || start < 0) start = 0
+  if (!end || end < 0 || end > len) end = len
+
+  var out = ''
+  for (var i = start; i < end; i++) {
+    out += toHex(buf[i])
+  }
+  return out
+}
+
+function utf16leSlice (buf, start, end) {
+  var bytes = buf.slice(start, end)
+  var res = ''
+  for (var i = 0; i < bytes.length; i += 2) {
+    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256)
+  }
+  return res
+}
+
+Buffer.prototype.slice = function (start, end) {
+  var len = this.length
+  start = ~~start
+  end = end === undefined ? len : ~~end
+
+  if (start < 0) {
+    start += len;
+    if (start < 0)
+      start = 0
+  } else if (start > len) {
+    start = len
+  }
+
+  if (end < 0) {
+    end += len
+    if (end < 0)
+      end = 0
+  } else if (end > len) {
+    end = len
+  }
+
+  if (end < start)
+    end = start
+
+  if (TYPED_ARRAY_SUPPORT) {
+    return Buffer._augment(this.subarray(start, end))
+  } else {
+    var sliceLen = end - start
+    var newBuf = new Buffer(sliceLen, undefined, true)
+    for (var i = 0; i < sliceLen; i++) {
+      newBuf[i] = this[i + start]
+    }
+    return newBuf
+  }
+}
+
+// `get` will be removed in Node 0.13+
+Buffer.prototype.get = function (offset) {
+  console.log('.get() is deprecated. Access using array indexes instead.')
+  return this.readUInt8(offset)
+}
+
+// `set` will be removed in Node 0.13+
+Buffer.prototype.set = function (v, offset) {
+  console.log('.set() is deprecated. Access using array indexes instead.')
+  return this.writeUInt8(v, offset)
+}
+
+Buffer.prototype.readUInt8 = function (offset, noAssert) {
+  if (!noAssert) {
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset < this.length, 'Trying to read beyond buffer length')
+  }
+
+  if (offset >= this.length)
+    return
+
+  return this[offset]
+}
+
+function readUInt16 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val
+  if (littleEndian) {
+    val = buf[offset]
+    if (offset + 1 < len)
+      val |= buf[offset + 1] << 8
+  } else {
+    val = buf[offset] << 8
+    if (offset + 1 < len)
+      val |= buf[offset + 1]
+  }
+  return val
+}
+
+Buffer.prototype.readUInt16LE = function (offset, noAssert) {
+  return readUInt16(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readUInt16BE = function (offset, noAssert) {
+  return readUInt16(this, offset, false, noAssert)
+}
+
+function readUInt32 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val
+  if (littleEndian) {
+    if (offset + 2 < len)
+      val = buf[offset + 2] << 16
+    if (offset + 1 < len)
+      val |= buf[offset + 1] << 8
+    val |= buf[offset]
+    if (offset + 3 < len)
+      val = val + (buf[offset + 3] << 24 >>> 0)
+  } else {
+    if (offset + 1 < len)
+      val = buf[offset + 1] << 16
+    if (offset + 2 < len)
+      val |= buf[offset + 2] << 8
+    if (offset + 3 < len)
+      val |= buf[offset + 3]
+    val = val + (buf[offset] << 24 >>> 0)
+  }
+  return val
+}
+
+Buffer.prototype.readUInt32LE = function (offset, noAssert) {
+  return readUInt32(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readUInt32BE = function (offset, noAssert) {
+  return readUInt32(this, offset, false, noAssert)
+}
+
+Buffer.prototype.readInt8 = function (offset, noAssert) {
+  if (!noAssert) {
+    assert(offset !== undefined && offset !== null,
+        'missing offset')
+    assert(offset < this.length, 'Trying to read beyond buffer length')
+  }
+
+  if (offset >= this.length)
+    return
+
+  var neg = this[offset] & 0x80
+  if (neg)
+    return (0xff - this[offset] + 1) * -1
+  else
+    return this[offset]
+}
+
+function readInt16 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val = readUInt16(buf, offset, littleEndian, true)
+  var neg = val & 0x8000
+  if (neg)
+    return (0xffff - val + 1) * -1
+  else
+    return val
+}
+
+Buffer.prototype.readInt16LE = function (offset, noAssert) {
+  return readInt16(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readInt16BE = function (offset, noAssert) {
+  return readInt16(this, offset, false, noAssert)
+}
+
+function readInt32 (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  var val = readUInt32(buf, offset, littleEndian, true)
+  var neg = val & 0x80000000
+  if (neg)
+    return (0xffffffff - val + 1) * -1
+  else
+    return val
+}
+
+Buffer.prototype.readInt32LE = function (offset, noAssert) {
+  return readInt32(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readInt32BE = function (offset, noAssert) {
+  return readInt32(this, offset, false, noAssert)
+}
+
+function readFloat (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  return ieee754.read(buf, offset, littleEndian, 23, 4)
+}
+
+Buffer.prototype.readFloatLE = function (offset, noAssert) {
+  return readFloat(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readFloatBE = function (offset, noAssert) {
+  return readFloat(this, offset, false, noAssert)
+}
+
+function readDouble (buf, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset + 7 < buf.length, 'Trying to read beyond buffer length')
+  }
+
+  return ieee754.read(buf, offset, littleEndian, 52, 8)
+}
+
+Buffer.prototype.readDoubleLE = function (offset, noAssert) {
+  return readDouble(this, offset, true, noAssert)
+}
+
+Buffer.prototype.readDoubleBE = function (offset, noAssert) {
+  return readDouble(this, offset, false, noAssert)
+}
+
+Buffer.prototype.writeUInt8 = function (value, offset, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset < this.length, 'trying to write beyond buffer length')
+    verifuint(value, 0xff)
+  }
+
+  if (offset >= this.length) return
+
+  this[offset] = value
+  return offset + 1
+}
+
+function writeUInt16 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'trying to write beyond buffer length')
+    verifuint(value, 0xffff)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  for (var i = 0, j = Math.min(len - offset, 2); i < j; i++) {
+    buf[offset + i] =
+        (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
+            (littleEndian ? i : 1 - i) * 8
+  }
+  return offset + 2
+}
+
+Buffer.prototype.writeUInt16LE = function (value, offset, noAssert) {
+  return writeUInt16(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeUInt16BE = function (value, offset, noAssert) {
+  return writeUInt16(this, value, offset, false, noAssert)
+}
+
+function writeUInt32 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'trying to write beyond buffer length')
+    verifuint(value, 0xffffffff)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  for (var i = 0, j = Math.min(len - offset, 4); i < j; i++) {
+    buf[offset + i] =
+        (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
+  }
+  return offset + 4
+}
+
+Buffer.prototype.writeUInt32LE = function (value, offset, noAssert) {
+  return writeUInt32(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
+  return writeUInt32(this, value, offset, false, noAssert)
+}
+
+Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset < this.length, 'Trying to write beyond buffer length')
+    verifsint(value, 0x7f, -0x80)
+  }
+
+  if (offset >= this.length)
+    return
+
+  if (value >= 0)
+    this.writeUInt8(value, offset, noAssert)
+  else
+    this.writeUInt8(0xff + value + 1, offset, noAssert)
+  return offset + 1
+}
+
+function writeInt16 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 1 < buf.length, 'Trying to write beyond buffer length')
+    verifsint(value, 0x7fff, -0x8000)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  if (value >= 0)
+    writeUInt16(buf, value, offset, littleEndian, noAssert)
+  else
+    writeUInt16(buf, 0xffff + value + 1, offset, littleEndian, noAssert)
+  return offset + 2
+}
+
+Buffer.prototype.writeInt16LE = function (value, offset, noAssert) {
+  return writeInt16(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeInt16BE = function (value, offset, noAssert) {
+  return writeInt16(this, value, offset, false, noAssert)
+}
+
+function writeInt32 (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to write beyond buffer length')
+    verifsint(value, 0x7fffffff, -0x80000000)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  if (value >= 0)
+    writeUInt32(buf, value, offset, littleEndian, noAssert)
+  else
+    writeUInt32(buf, 0xffffffff + value + 1, offset, littleEndian, noAssert)
+  return offset + 4
+}
+
+Buffer.prototype.writeInt32LE = function (value, offset, noAssert) {
+  return writeInt32(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeInt32BE = function (value, offset, noAssert) {
+  return writeInt32(this, value, offset, false, noAssert)
+}
+
+function writeFloat (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 3 < buf.length, 'Trying to write beyond buffer length')
+    verifIEEE754(value, 3.4028234663852886e+38, -3.4028234663852886e+38)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  ieee754.write(buf, value, offset, littleEndian, 23, 4)
+  return offset + 4
+}
+
+Buffer.prototype.writeFloatLE = function (value, offset, noAssert) {
+  return writeFloat(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeFloatBE = function (value, offset, noAssert) {
+  return writeFloat(this, value, offset, false, noAssert)
+}
+
+function writeDouble (buf, value, offset, littleEndian, noAssert) {
+  if (!noAssert) {
+    assert(value !== undefined && value !== null, 'missing value')
+    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
+    assert(offset !== undefined && offset !== null, 'missing offset')
+    assert(offset + 7 < buf.length,
+        'Trying to write beyond buffer length')
+    verifIEEE754(value, 1.7976931348623157E+308, -1.7976931348623157E+308)
+  }
+
+  var len = buf.length
+  if (offset >= len)
+    return
+
+  ieee754.write(buf, value, offset, littleEndian, 52, 8)
+  return offset + 8
+}
+
+Buffer.prototype.writeDoubleLE = function (value, offset, noAssert) {
+  return writeDouble(this, value, offset, true, noAssert)
+}
+
+Buffer.prototype.writeDoubleBE = function (value, offset, noAssert) {
+  return writeDouble(this, value, offset, false, noAssert)
+}
+
+// fill(value, start=0, end=buffer.length)
+Buffer.prototype.fill = function (value, start, end) {
+  if (!value) value = 0
+  if (!start) start = 0
+  if (!end) end = this.length
+
+  assert(end >= start, 'end < start')
+
+  // Fill 0 bytes; we're done
+  if (end === start) return
+  if (this.length === 0) return
+
+  assert(start >= 0 && start < this.length, 'start out of bounds')
+  assert(end >= 0 && end <= this.length, 'end out of bounds')
+
+  var i
+  if (typeof value === 'number') {
+    for (i = start; i < end; i++) {
+      this[i] = value
+    }
+  } else {
+    var bytes = utf8ToBytes(value.toString())
+    var len = bytes.length
+    for (i = start; i < end; i++) {
+      this[i] = bytes[i % len]
+    }
+  }
+
+  return this
+}
+
+Buffer.prototype.inspect = function () {
+  var out = []
+  var len = this.length
+  for (var i = 0; i < len; i++) {
+    out[i] = toHex(this[i])
+    if (i === exports.INSPECT_MAX_BYTES) {
+      out[i + 1] = '...'
+      break
+    }
+  }
+  return '<Buffer ' + out.join(' ') + '>'
+}
+
+/**
+ * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
+ * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
+ */
+Buffer.prototype.toArrayBuffer = function () {
+  if (typeof Uint8Array !== 'undefined') {
+    if (TYPED_ARRAY_SUPPORT) {
+      return (new Buffer(this)).buffer
+    } else {
+      var buf = new Uint8Array(this.length)
+      for (var i = 0, len = buf.length; i < len; i += 1) {
+        buf[i] = this[i]
+      }
+      return buf.buffer
+    }
+  } else {
+    throw new Error('Buffer.toArrayBuffer not supported in this browser')
+  }
+}
+
+// HELPER FUNCTIONS
+// ================
+
+var BP = Buffer.prototype
+
+/**
+ * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
+ */
+Buffer._augment = function (arr) {
+  arr._isBuffer = true
+
+  // save reference to original Uint8Array get/set methods before overwriting
+  arr._get = arr.get
+  arr._set = arr.set
+
+  // deprecated, will be removed in node 0.13+
+  arr.get = BP.get
+  arr.set = BP.set
+
+  arr.write = BP.write
+  arr.toString = BP.toString
+  arr.toLocaleString = BP.toString
+  arr.toJSON = BP.toJSON
+  arr.equals = BP.equals
+  arr.compare = BP.compare
+  arr.copy = BP.copy
+  arr.slice = BP.slice
+  arr.readUInt8 = BP.readUInt8
+  arr.readUInt16LE = BP.readUInt16LE
+  arr.readUInt16BE = BP.readUInt16BE
+  arr.readUInt32LE = BP.readUInt32LE
+  arr.readUInt32BE = BP.readUInt32BE
+  arr.readInt8 = BP.readInt8
+  arr.readInt16LE = BP.readInt16LE
+  arr.readInt16BE = BP.readInt16BE
+  arr.readInt32LE = BP.readInt32LE
+  arr.readInt32BE = BP.readInt32BE
+  arr.readFloatLE = BP.readFloatLE
+  arr.readFloatBE = BP.readFloatBE
+  arr.readDoubleLE = BP.readDoubleLE
+  arr.readDoubleBE = BP.readDoubleBE
+  arr.writeUInt8 = BP.writeUInt8
+  arr.writeUInt16LE = BP.writeUInt16LE
+  arr.writeUInt16BE = BP.writeUInt16BE
+  arr.writeUInt32LE = BP.writeUInt32LE
+  arr.writeUInt32BE = BP.writeUInt32BE
+  arr.writeInt8 = BP.writeInt8
+  arr.writeInt16LE = BP.writeInt16LE
+  arr.writeInt16BE = BP.writeInt16BE
+  arr.writeInt32LE = BP.writeInt32LE
+  arr.writeInt32BE = BP.writeInt32BE
+  arr.writeFloatLE = BP.writeFloatLE
+  arr.writeFloatBE = BP.writeFloatBE
+  arr.writeDoubleLE = BP.writeDoubleLE
+  arr.writeDoubleBE = BP.writeDoubleBE
+  arr.fill = BP.fill
+  arr.inspect = BP.inspect
+  arr.toArrayBuffer = BP.toArrayBuffer
+
+  return arr
+}
+
+var INVALID_BASE64_RE = /[^+\/0-9A-z]/g
+
+function base64clean (str) {
+  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+  while (str.length % 4 !== 0) {
+    str = str + '='
+  }
+  return str
+}
+
+function stringtrim (str) {
+  if (str.trim) return str.trim()
+  return str.replace(/^\s+|\s+$/g, '')
+}
+
+function isArray (subject) {
+  return (Array.isArray || function (subject) {
+    return Object.prototype.toString.call(subject) === '[object Array]'
+  })(subject)
+}
+
+function isArrayish (subject) {
+  return isArray(subject) || Buffer.isBuffer(subject) ||
+      subject && typeof subject === 'object' &&
+      typeof subject.length === 'number'
+}
+
+function toHex (n) {
+  if (n < 16) return '0' + n.toString(16)
+  return n.toString(16)
+}
+
+function utf8ToBytes (str) {
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    var b = str.charCodeAt(i)
+    if (b <= 0x7F) {
+      byteArray.push(b)
+    } else {
+      var start = i
+      if (b >= 0xD800 && b <= 0xDFFF) i++
+      var h = encodeURIComponent(str.slice(start, i+1)).substr(1).split('%')
+      for (var j = 0; j < h.length; j++) {
+        byteArray.push(parseInt(h[j], 16))
+      }
+    }
+  }
+  return byteArray
+}
+
+function asciiToBytes (str) {
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    // Node's code seems to be doing this and not & 0x7F..
+    byteArray.push(str.charCodeAt(i) & 0xFF)
+  }
+  return byteArray
+}
+
+function utf16leToBytes (str) {
+  var c, hi, lo
+  var byteArray = []
+  for (var i = 0; i < str.length; i++) {
+    c = str.charCodeAt(i)
+    hi = c >> 8
+    lo = c % 256
+    byteArray.push(lo)
+    byteArray.push(hi)
+  }
+
+  return byteArray
+}
+
+function base64ToBytes (str) {
+  return base64.toByteArray(str)
+}
+
+function blitBuffer (src, dst, offset, length) {
+  for (var i = 0; i < length; i++) {
+    if ((i + offset >= dst.length) || (i >= src.length))
+      break
+    dst[i + offset] = src[i]
+  }
+  return i
+}
+
+function decodeUtf8Char (str) {
+  try {
+    return decodeURIComponent(str)
+  } catch (err) {
+    return String.fromCharCode(0xFFFD) // UTF 8 invalid char
+  }
+}
+
+/*
+ * We have to make sure that the value is a valid integer. This means that it
+ * is non-negative. It has no fractional component and that it does not
+ * exceed the maximum allowed value.
+ */
+function verifuint (value, max) {
+  assert(typeof value === 'number', 'cannot write a non-number as a number')
+  assert(value >= 0, 'specified a negative value for writing an unsigned value')
+  assert(value <= max, 'value is larger than maximum value for type')
+  assert(Math.floor(value) === value, 'value has a fractional component')
+}
+
+function verifsint (value, max, min) {
+  assert(typeof value === 'number', 'cannot write a non-number as a number')
+  assert(value <= max, 'value larger than maximum allowed value')
+  assert(value >= min, 'value smaller than minimum allowed value')
+  assert(Math.floor(value) === value, 'value has a fractional component')
+}
+
+function verifIEEE754 (value, max, min) {
+  assert(typeof value === 'number', 'cannot write a non-number as a number')
+  assert(value <= max, 'value larger than maximum allowed value')
+  assert(value >= min, 'value smaller than minimum allowed value')
+}
+
+function assert (test, message) {
+  if (!test) throw new Error(message || 'Failed assertion')
+}
+
+},{"base64-js":115,"ieee754":116}],115:[function(require,module,exports){
+var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+;(function (exports) {
+	'use strict';
+
+  var Arr = (typeof Uint8Array !== 'undefined')
+    ? Uint8Array
+    : Array
+
+	var PLUS   = '+'.charCodeAt(0)
+	var SLASH  = '/'.charCodeAt(0)
+	var NUMBER = '0'.charCodeAt(0)
+	var LOWER  = 'a'.charCodeAt(0)
+	var UPPER  = 'A'.charCodeAt(0)
+
+	function decode (elt) {
+		var code = elt.charCodeAt(0)
+		if (code === PLUS)
+			return 62 // '+'
+		if (code === SLASH)
+			return 63 // '/'
+		if (code < NUMBER)
+			return -1 //no match
+		if (code < NUMBER + 10)
+			return code - NUMBER + 26 + 26
+		if (code < UPPER + 26)
+			return code - UPPER
+		if (code < LOWER + 26)
+			return code - LOWER + 26
+	}
+
+	function b64ToByteArray (b64) {
+		var i, j, l, tmp, placeHolders, arr
+
+		if (b64.length % 4 > 0) {
+			throw new Error('Invalid string. Length must be a multiple of 4')
+		}
+
+		// the number of equal signs (place holders)
+		// if there are two placeholders, than the two characters before it
+		// represent one byte
+		// if there is only one, then the three characters before it represent 2 bytes
+		// this is just a cheap hack to not do indexOf twice
+		var len = b64.length
+		placeHolders = '=' === b64.charAt(len - 2) ? 2 : '=' === b64.charAt(len - 1) ? 1 : 0
+
+		// base64 is 4/3 + up to two characters of the original data
+		arr = new Arr(b64.length * 3 / 4 - placeHolders)
+
+		// if there are placeholders, only get up to the last complete 4 chars
+		l = placeHolders > 0 ? b64.length - 4 : b64.length
+
+		var L = 0
+
+		function push (v) {
+			arr[L++] = v
+		}
+
+		for (i = 0, j = 0; i < l; i += 4, j += 3) {
+			tmp = (decode(b64.charAt(i)) << 18) | (decode(b64.charAt(i + 1)) << 12) | (decode(b64.charAt(i + 2)) << 6) | decode(b64.charAt(i + 3))
+			push((tmp & 0xFF0000) >> 16)
+			push((tmp & 0xFF00) >> 8)
+			push(tmp & 0xFF)
+		}
+
+		if (placeHolders === 2) {
+			tmp = (decode(b64.charAt(i)) << 2) | (decode(b64.charAt(i + 1)) >> 4)
+			push(tmp & 0xFF)
+		} else if (placeHolders === 1) {
+			tmp = (decode(b64.charAt(i)) << 10) | (decode(b64.charAt(i + 1)) << 4) | (decode(b64.charAt(i + 2)) >> 2)
+			push((tmp >> 8) & 0xFF)
+			push(tmp & 0xFF)
+		}
+
+		return arr
+	}
+
+	function uint8ToBase64 (uint8) {
+		var i,
+			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+			output = "",
+			temp, length
+
+		function encode (num) {
+			return lookup.charAt(num)
+		}
+
+		function tripletToBase64 (num) {
+			return encode(num >> 18 & 0x3F) + encode(num >> 12 & 0x3F) + encode(num >> 6 & 0x3F) + encode(num & 0x3F)
+		}
+
+		// go through the array every three bytes, we'll deal with trailing stuff later
+		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+			output += tripletToBase64(temp)
+		}
+
+		// pad the end with zeros, but make sure to not forget the extra bytes
+		switch (extraBytes) {
+			case 1:
+				temp = uint8[uint8.length - 1]
+				output += encode(temp >> 2)
+				output += encode((temp << 4) & 0x3F)
+				output += '=='
+				break
+			case 2:
+				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1])
+				output += encode(temp >> 10)
+				output += encode((temp >> 4) & 0x3F)
+				output += encode((temp << 2) & 0x3F)
+				output += '='
+				break
+		}
+
+		return output
+	}
+
+	exports.toByteArray = b64ToByteArray
+	exports.fromByteArray = uint8ToBase64
+}(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
+
+},{}],116:[function(require,module,exports){
+exports.read = function(buffer, offset, isLE, mLen, nBytes) {
+  var e, m,
+      eLen = nBytes * 8 - mLen - 1,
+      eMax = (1 << eLen) - 1,
+      eBias = eMax >> 1,
+      nBits = -7,
+      i = isLE ? (nBytes - 1) : 0,
+      d = isLE ? -1 : 1,
+      s = buffer[offset + i];
+
+  i += d;
+
+  e = s & ((1 << (-nBits)) - 1);
+  s >>= (-nBits);
+  nBits += eLen;
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+
+  m = e & ((1 << (-nBits)) - 1);
+  e >>= (-nBits);
+  nBits += mLen;
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+
+  if (e === 0) {
+    e = 1 - eBias;
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity);
+  } else {
+    m = m + Math.pow(2, mLen);
+    e = e - eBias;
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+};
+
+exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c,
+      eLen = nBytes * 8 - mLen - 1,
+      eMax = (1 << eLen) - 1,
+      eBias = eMax >> 1,
+      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
+      i = isLE ? 0 : (nBytes - 1),
+      d = isLE ? 1 : -1,
+      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+
+  value = Math.abs(value);
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0;
+    e = eMax;
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2);
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--;
+      c *= 2;
+    }
+    if (e + eBias >= 1) {
+      value += rt / c;
+    } else {
+      value += rt * Math.pow(2, 1 - eBias);
+    }
+    if (value * c >= 2) {
+      e++;
+      c /= 2;
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0;
+      e = eMax;
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen);
+      e = e + eBias;
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+      e = 0;
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+
+  e = (e << mLen) | m;
+  eLen += mLen;
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+
+  buffer[offset + i - d] |= s * 128;
+};
+
+},{}],117:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6139,7 +7187,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],108:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
