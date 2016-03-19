@@ -7,7 +7,7 @@ $(document).ready(function(){
 		var $valoresDOM = $('#inputs');
 		for(var i = 0; i<n; i++){
 			$valoresDOM.append(
-				'<div><input class="xVal" type="number"/><input class="yVal" type="number"/></div>'
+				'<div><input class="xVal" type="number" placeholder="x"/><input class="yVal" type="number" placeholder="y"/></div>'
 			);
 		}
 
