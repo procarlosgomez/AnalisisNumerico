@@ -8,3 +8,8 @@
 #container #column-left input{
 	padding: 8px 5px;
 }
+
+
+#container #column-left #inputs{
+  width: 30px;
+}
