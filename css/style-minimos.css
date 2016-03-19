@@ -12,9 +12,14 @@
 #container #column-left #inputs {
 	margin-top: 20px;
 }
-#container #column-left #inputs Muestra{
-	margin-top: 20px;
+#container #column-left #inputs label{
+	margin-bottom: 5px;
+	display: block;
 }
 #container #column-left #inputs input{
 	width: 77.5px;
+}
+#container #column-left #inputs button{
+	margin-top: 10px;
+	width: 183px;
 }
