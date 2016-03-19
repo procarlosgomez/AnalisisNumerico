@@ -82,7 +82,6 @@
 		function draw() {
 			var values = [];
 			var inputVal = document.getElementById('eq').value;
-			if(inputVal == '') return;
 
 			if(inputVal.indexOf(';') !== -1){
 				var tempArray = inputVal.split(";");
@@ -94,6 +93,14 @@
 						graphType: 'polyline'
 					})
 				}
+			}else if(inputVal == ''){
+				values.push({
+			    x: 'sin(t) * (exp(cos(t)) - 2 cos(4t) - sin(t/12)^5)',
+			    y: 'cos(t) * (exp(cos(t)) - 2 cos(4t) - sin(t/12)^5)',
+			    range: [-10 * Math.PI, 10 * Math.PI],
+			    fnType: 'parametric',
+			    graphType: 'polyline'
+			  });
 			}else{
 				values.push({
 					fn: inputVal,
@@ -107,9 +114,12 @@
 					target: '#plot',
 					data: values
 				});
-				var xDomain = [-10, 10]
-				var yDomain = [-1.897, 1.897]
-				instance.programmaticZoom(xDomain, yDomain)
+
+				if(inputVal !== ''){
+					var xDomain = [-10, 10]
+					var yDomain = [-1.897, 1.897]
+					instance.programmaticZoom(xDomain, yDomain)
+				}
 			}
 			catch (err) {
 			  console.log(err);
