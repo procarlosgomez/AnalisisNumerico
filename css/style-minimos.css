@@ -1,16 +1,20 @@
 #container #main-minimos{
-  padding: 2%;
+	padding: 2%;
+	width: 100%;
 }
 #container #form{
-   position:left;
+	position:left;
 }
 
 #container #column-left input{
 	padding: 5px 5px;
 }
 #container #column-left #inputs {
-  margin-top: 20px;
+	margin-top: 20px;
+}
+#container #column-left #inputs Muestra{
+	margin-top: 20px;
 }
 #container #column-left #inputs input{
-  width: 77.5px;
+	width: 77.5px;
 }
