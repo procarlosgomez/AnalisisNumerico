@@ -1,0 +1,7 @@
+#container #main-minimos{
+
+}
+#container #form{
+	margin: 1 px;
+	position:left;
+}

@@ -21,26 +21,47 @@ html, body{
 	height: 100%;
 }
 
-#container #menu{
-	position: absolute;
+#container #header a{
+	float: right;
+	height: 100%;
+	text-decoration: none;
 	text-align: center;
-	width: 100%;
-	top: 50%;
-	transform: translateY(-50%);
+	color: #670080;
+	font-weight: bold;
+}
+#container #header a img{
+	height: calc(100% - 15px);
+}
+
+
+#container #menu{
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    top: 50%;
+    margin: auto 0;
 }
 
 #container #menu a{
 	display: inline-block;
-	
 	width: 150px;
 	text-align: center;
-	background-image: url("icons/analytics-chart.svg");
+	color: #252525;
 	background-repeat: no-repeat;
 	background-position: top center;
 	background-size: 60px;
 	padding-top: 50px;
 	text-decoration: none;
 }
+
+#container #menu a#graph{
+	background-image: url("icons/analytics-chart.svg");
+}
+
+#container #menu a#minim{
+	background-image: url("icons/minimos.svg");
+}
+
 
 #container #menu a.selected{
 	cursor: pointer;
@@ -65,24 +86,34 @@ html, body{
 	color: #A0A0A0;
 	display: inline-block;
 	margin-left: 20px;
-	font-size: 16px;
+	font-size: 13px;
+	text-align: center;
 }
 #container #footer-content h3 div{
-	font-size: 12px;
+	font-size: 10px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 	#container{
 		min-height: 650px;
 	}
 	#container #menu{
-		bottom: 90px;
+		top: auto;
+		bottom: 140px;
 	}
 }
 
 @media (max-width: 500px) {
+	#container #header{
+		height: 40px;
+		padding: 30px;
+		padding-left: 20px;
+	}
+	#container #header a{
+		font-size: 14px;
+	}
 	#container{
-		min-height: 700px;
+		min-height: 750px;
 	}
 }
 
