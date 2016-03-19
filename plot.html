@@ -80,14 +80,44 @@
 	</div>
 	<script>
 		function draw() {
+			
+			
+			var inputVal = document.getElementById('eq').value;
+			
+			var values=[];
+			if(inputVal.indexOf(';')=-1){
+				var tempArray = inputVal.split(';');
+				for(var i in tempArray){
+					values.push({
+						fn: tempArray[i],
+						sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
+						graphType: 'polyline'
+					})		
+				}
+			}else{
+				values.push({
+					fn: inputVal,
+					sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
+					graphType: 'polyline'
+				})
+			}
+			
 			try {
 				var instance = functionPlot({
 					target: '#plot',
-					data: [{
-					fn: document.getElementById('eq').value,
+					
+					,data: values
+					/*data: [{
+						fn: 'sin(x)',
 						sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
 						graphType: 'polyline'
-					}]
+					},
+					{
+						fn: 'cos(x)',
+						sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
+						graphType: 'polyline'
+					}
+					]*/
 				});
 				var xDomain = [-10, 10]
 				var yDomain = [-1.897, 1.897]
