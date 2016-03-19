@@ -1,0 +1,13 @@
+minimos cuadrados
+1 captura de datos
+2 modelo lineal: grafica, ecuacion
+					errores tabla
+					
+3 modelo cuadratico: grafico, ecuacion, errores
+4 modelo exponencial: grafico, ecuacion, errores
+
+ecuaciones no lineales: menu
+						capturar ecuacion
+						metodo diseccion
+						metodo 
+						metodo de la secante. 
