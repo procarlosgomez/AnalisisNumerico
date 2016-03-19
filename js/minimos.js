@@ -1,6 +1,10 @@
 var n;
 var $valoresDOM = $('#inputs'),
-		$btnCalc = '<button type="button">Calcular minimos cuadrados</button>';
+		$btnCalc = '<button type="button">Calcular minimos cuadrados</button>',
+		data = {
+			x: [], y: []
+		}
+;
 
 $(document).ready(function(){
 	document.getElementById('formulario').onsubmit = function (event) {
@@ -26,7 +30,13 @@ $(document).ready(function(){
 
 //no existe aun por eso lo hago asi
 $('body').on($btnCalc, 'click', function(){
-	let data = {
-		x: [], y: []
-	}
+	$valoresDOM.find('input.xVal').each(function(){
+		data.xVal.push($(this).val());
+	})
+
+	$valoresDOM.find('input.yVal').each(function(){
+		data.yVal.push($(this).val());
+	})
+
+	console.log(data);
 })
