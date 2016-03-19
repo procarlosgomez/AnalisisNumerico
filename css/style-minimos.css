@@ -2,5 +2,9 @@
 
 }
 #container #form{
-	position:left;
+   position:left;
+}
+
+#container #column-left input{
+	padding 0 20px;
 }
