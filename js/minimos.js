@@ -5,9 +5,12 @@ $(document).ready(function(){
 		event.preventDefault();
 		n = $('#NMuestra').val();
 		var $valoresDOM = $('#inputs');
+		$valoresDOM.append(
+			'<label>Entradas</label>'
+		);
 		for(var i = 0; i<n; i++){
 			$valoresDOM.append(
-				'<div><input class="xVal" type="number" placeholder="x"/><input class="yVal" type="number" placeholder="y"/></div>'
+				'<div><input class="xVal" type="number" placeholder="x'+(i+1)+'"/><input class="yVal" type="number" placeholder="y'+i+'"/></div>'
 			);
 		}
 
