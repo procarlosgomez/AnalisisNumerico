@@ -2,6 +2,5 @@
 
 }
 #container #form{
-	margin: 1 px;
 	position:left;
 }

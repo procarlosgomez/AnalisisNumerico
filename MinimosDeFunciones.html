@@ -26,12 +26,13 @@
 						<td id ="column-left">
 							<form id="formulario">
 								<label for="eq">Ingrese la cantidad de valores de la muestra:</label><br>
-								<input type="text" id="eq" value=" " />
+								<input type="text" id="values" value=" " />
 								<input type="submit" value="Continuar" />
-								<input type="button" id="volver" value="Cancelar">
+								<input type="button" id="Cancelar" value="Cancelar">
 							</form>
 						</td>
 						<td id ="column-rigth">
+
 						</td>
 					</tr>
 				</table>
@@ -50,4 +51,37 @@
 		</div>
 		<script src="js/jquery.min.js"></script>
 	</body>
+
+	<script>
+		function draw() {
+			try {
+				var instance = functionPlot({
+					target: '#plot',
+					data: [{
+					fn: document.getElementById('eq').value,
+						sampler: 'builtIn',  // this will make function-plot use the evaluator of math.js
+						graphType: 'polyline'
+					}]
+				});
+				var xDomain = [-10, 10]
+				var yDomain = [-1.897, 1.897]
+				instance.programmaticZoom(xDomain, yDomain)
+			}
+			catch (err) {
+			  console.log(err);
+			  alert(err);
+			}
+		}
+
+		document.getElementById('formulario').onsubmit = function (event) {
+			event.preventDefault();
+			draw();
+		};
+
+		draw();
+			document.getElementById('Cancelar').onclick = function(){
+			location.href = "index.html";
+		};
+	</script>
+	
 </html>
