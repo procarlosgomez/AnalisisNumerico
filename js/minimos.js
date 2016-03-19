@@ -10,7 +10,7 @@ $(document).ready(function(){
 		);
 		for(var i = 0; i<n; i++){
 			$valoresDOM.append(
-				'<div><input class="xVal" type="number" placeholder="x'+i+'"/><input class="yVal" type="number" placeholder="y'+i+'"/></div>'
+				'<div><input class="xVal" type="number" placeholder="x'+(i+1)+'"/><input class="yVal" type="number" placeholder="y'+(i+1)+'"/></div>'
 			);
 		}
 
