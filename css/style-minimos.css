@@ -8,7 +8,9 @@
 #container #column-left input{
 	padding: 5px 5px;
 }
-
+#container #column-left #inputs {
+  margin-top: 20px;
+}
 #container #column-left #inputs input{
-  width: 50px;
+  width: 77.5px;
 }
