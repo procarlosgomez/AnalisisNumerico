@@ -7,9 +7,11 @@ $(document).ready(function(){
 		var $valoresDOM = $('#inputs');
 		for(var i = 0; i<n; i++){
 			$valoresDOM.append(
-				$('<div><input class="xVal" type="number"/><input class="yVal" type="number"/></div>')
+				'<div><input class="xVal" type="number"/><input class="yVal" type="number"/></div>'
 			);
 		}
+
+		$valoresDOM.append('<button type="button">Calcular minimos cuadrados</button>')
 	};
 
 	document.getElementById('Cancelar').onclick = function(){
