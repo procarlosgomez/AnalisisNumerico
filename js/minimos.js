@@ -1,4 +1,4 @@
-var n, m, b, minX, maxX, minY, maxY;
+var n, m, b, min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
 var	sumX = sumY = sumXX = sumXY = 0;
 var $valoresDOM = $('#inputs'),
@@ -38,6 +38,7 @@ $('body').on('click', '#btnCalc', function(){
 	var data = {
 		x: [], y: []
 	};
+	hasError = false;
 
 	for(var i = 0; i<n; i++){
 		$xInput = $valoresDOM.find('input.xVal').eq(i);
@@ -66,17 +67,32 @@ $('body').on('click', '#btnCalc', function(){
 	}
 
 	function sumData(){
+		min = {x: null, y: null}, max={x: null, y: null};
 		sumX = sumY = sumXX = sumXY = 0.0;
+
 		for(var i = 0; i<n; i++){
 			sumX += data.x[i];
 			sumY += data.y[i];
 			sumXX += data.x[i] * data.x[i];
 			sumXY += data.x[i] * data.y[i];
+
+			//minimos
+			if(min.x === null)	min.x = data.x[i];
+			else if(data.x[i] < min.x) 	min.x	= data.x[i];
+
+			if(min.y === null)	min.y = data.y[i];
+			else if(data.y[i] < min.y) 	min.y	= data.y[i];
+
+			//maximos
+			if(max.x === null)	max.x = data.x[i];
+			else if(data.x[i] > max.x) 	max.x	= data.x[i];
+
+			if(max.y === null)	max.y = data.y[i];
+			else if(data.y[i] > max.y) 	max.y	= data.y[i];
 		}
 	}
 	sumData();
 
-	//console.log(sumX, sumY, sumXX, sumXY, n);
 	function makeLineal(){
 		m = ((n*sumXY) - (sumX*sumY)) / ((n*sumXX)-(sumX*sumX));
 		b = (sumY - (m * sumX))/n;
@@ -106,8 +122,8 @@ $('body').on('click', '#btnCalc', function(){
 				data: dataPlot
 			});
 
-			var xDomain = [-10, 10]
-			var yDomain = [-1.897, 1.897]
+			var xDomain = [min.x-1, max.x+1]
+			var yDomain = [min.y-1, max.y+1]
 			instance.programmaticZoom(xDomain, yDomain)
 
 		}
@@ -117,93 +133,7 @@ $('body').on('click', '#btnCalc', function(){
 		}
 	}
 
-	if(hasError){
+	if(!hasError){
 		makeLineal();
 	}
-	/*
-
-	var hasError = false;
-	$valoresDOM.find('input.xVal').each(function(){
-		if($(this).val() == ''){
-			hasError = true;
-			$(this).css('border', '1px solid red');
-		}
-
-		data.x.push(parseFloat($(this).val()));
-	})
-
-	$valoresDOM.find('input.yVal').each(function(){
-		if($(this).val() == ''){
-			hasError = true;
-			$(this).css('border', '1px solid red');
-		}
-
-		data.x.push(parseFloat($(this).val()));
-	})
-
-	if(hasError){
-		alert('Todas las Entradas son obligatorias');
-		return;
-	}
-
-	function sumData(){
-		sumX = sumY = sumXX = sumXY = 0;
-		for(var i in data.x){
-			sumX += data.x[i];
-			sumY += data.y[i];
-			sumXX += data.x[i]*data.x[i];
-			sumXY += (data.x[i] * data.y[i]);
-		}
-	}
-
-	function makeLineal(){
-		m = (((n*sumXY) - (sumX*sumY)) / ((n*sumXX)-(sumX*sumX)));
-		b = ((sumY - (m * sumX))/n);
-
-		var points = [];
-		for(i = 0; i<n; i++){
-			points.push([
-				data.x[i], data.y[i]
-			])
-		}
-
-		dataPlot = [{
-				fn: 				m+'x+'+b,
-				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
-				graphType:	'polyline'
-			},
-			{
-				points: 		points,
-				fnType: 		'points',
-				graphType:	'scatter'
-			}
-		];
-
-		try {
-			var instance = functionPlot({
-				target: '#plotLineal',
-				data: dataPlot
-			});
-
-
-			var xDomain = [-10, 10]
-			var yDomain = [-1.897, 1.897]
-			instance.programmaticZoom(xDomain, yDomain)
-
-		}
-		catch (err) {
-			console.log(err);
-			alert(err);
-		}
-
-
-	}
-
-	sumData();
-	makeLineal();
-
-	console.log('-----');
-	console.log(sumX, sumY, sumXX, sumXY);
-	console.log(m, b);
-	//console.log(m, b);*/
 });
