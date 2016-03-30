@@ -1,5 +1,5 @@
 var n, m, b, minX, maxX, minY, maxY;
-
+var hasError = false;
 var	sumX = sumY = sumXX = sumXY = 0;
 var $valoresDOM = $('#inputs'),
 		$btnCalc = '<button type="button" id="btnCalc">Calcular minimos cuadrados</button>',
@@ -40,11 +40,29 @@ $('body').on('click', '#btnCalc', function(){
 	};
 
 	for(var i = 0; i<n; i++){
-		var xValue = parseFloat($valoresDOM.find('input.xVal').eq(i).val());
-		var yValue = parseFloat($valoresDOM.find('input.yVal').eq(i).val());
+		$xInput = $valoresDOM.find('input.xVal').eq(i);
+		$yInput = $valoresDOM.find('input.yVal').eq(i);
+
+		var xValue = parseFloat($xInput.val());
+		var yValue = parseFloat($yInput.val());
+
+		if(isNaN(xValue)) {
+			hasError = true;
+			$xInput.css('border', '1px solid red');
+
+		}
+		if(isNaN(yValue)) {
+			hasError = true;
+			$yInput.css('border', '1px solid red');
+		}
 
 		data.x.push(xValue);
 		data.y.push(yValue);
+	}
+
+	if(hasError){
+		alert('Todas las Entradas son obligatorias');
+		return;
 	}
 
 	function sumData(){
@@ -62,9 +80,6 @@ $('body').on('click', '#btnCalc', function(){
 	function makeLineal(){
 		m = ((n*sumXY) - (sumX*sumY)) / ((n*sumXX)-(sumX*sumX));
 		b = (sumY - (m * sumX))/n;
-
-		console.log(m);
-
 
 		var points = [];
 		for(i = 0; i<n; i++){
@@ -102,8 +117,9 @@ $('body').on('click', '#btnCalc', function(){
 		}
 	}
 
-	makeLineal();
-
+	if(hasError){
+		makeLineal();
+	}
 	/*
 
 	var hasError = false;
