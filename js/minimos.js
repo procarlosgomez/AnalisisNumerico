@@ -39,6 +39,72 @@ $('body').on('click', '#btnCalc', function(){
 		x: [], y: []
 	};
 
+	for(var i = 0; i<n; i++){
+		var xValue = parseFloat($valoresDOM.find('input.xVal').eq(i).val());
+		var yValue = parseFloat($valoresDOM.find('input.yVal').eq(i).val());
+
+		data.x.push(xValue);
+		data.y.push(yValue);
+	}
+
+	function sumData(){
+		sumX = sumY = sumXX = sumXY = 0.0;
+		for(var i = 0; i<n; i++){
+			sumX += data.x[i];
+			sumY += data.y[i];
+			sumXX += data.x[i] * data.x[i];
+			sumXY += data.x[i] * data.y[i];
+		}
+	}
+	sumData();
+
+	//console.log(sumX, sumY, sumXX, sumXY, n);
+	function makeLineal(){
+		m = ((n*sumXY) - (sumX*sumY)) / ((n*sumXX)-(sumX*sumX));
+		b = (sumY - (m * sumX))/n;
+
+		console.log(m);
+
+
+		var points = [];
+		for(i = 0; i<n; i++){
+			points.push([
+				data.x[i], data.y[i]
+			])
+		}
+
+		dataPlot = [{
+				fn: 				m+'x+'+b,
+				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
+				graphType:	'polyline'
+			},
+			{
+				points: 		points,
+				fnType: 		'points',
+				graphType:	'scatter'
+			}
+		];
+
+		try {
+			var instance = functionPlot({
+				target: '#plotLineal',
+				data: dataPlot
+			});
+
+			var xDomain = [-10, 10]
+			var yDomain = [-1.897, 1.897]
+			instance.programmaticZoom(xDomain, yDomain)
+
+		}
+		catch (err) {
+			console.log(err);
+			alert(err);
+		}
+	}
+
+	makeLineal();
+
+	/*
 
 	var hasError = false;
 	$valoresDOM.find('input.xVal').each(function(){
@@ -123,5 +189,5 @@ $('body').on('click', '#btnCalc', function(){
 	console.log('-----');
 	console.log(sumX, sumY, sumXX, sumXY);
 	console.log(m, b);
-	//console.log(m, b);
+	//console.log(m, b);*/
 });
