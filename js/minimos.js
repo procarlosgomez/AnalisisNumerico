@@ -32,6 +32,8 @@ $(document).ready(function(){
 	};
 })
 
+//desuscribir evento
+$('body').off('click', '#btnCalc');
 
 //no existe aun por eso lo hago asi
 $('body').on('click', '#btnCalc', function(){
@@ -127,13 +129,26 @@ $('body').on('click', '#btnCalc', function(){
 			instance.programmaticZoom(xDomain, yDomain)
 
 		}
-		catch (err) {
-			console.log(err);
+			catch (err) {
+		 console.log(err);
 			alert(err);
 		}
 	}
 
+	function errorPorcentual(){
+		se=0;
+		e=[];
+		for (i=0;i<n;i++){
+			e[i]=Math.abs((data.y[i]-(m*data.x[i]+b))/data.y[i]);
+			se+=e[i];
+		}
+
+		console.log(se);
+	}
+
 	if(!hasError){
 		makeLineal();
+		errorPorcentual();
 	}
+
 });
