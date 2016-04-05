@@ -5,7 +5,9 @@
 #container #form{
 	position:left;
 }
-
+#container #column-left{
+	vertical-align: top;
+}
 #container #column-left input{
 	padding: 5px 5px;
 }
@@ -22,4 +24,19 @@
 #container #column-left #inputs button{
 	margin-top: 10px;
 	width: 183px;
+}
+#container #plotLineal{
+	float: left;
+}
+
+#container #tablaErrores{
+	float: left;
+}
+
+#container #tablaErrores .table-row .table-cell:first-child{
+	width: 100px;
+}
+
+#container #tablaErrores .table-row:last-child .table-cell{
+	padding-top: 10px;
 }
