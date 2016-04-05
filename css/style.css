@@ -59,6 +59,10 @@ html, body{
 }
 
 #container #menu a#minim{
+	background-image: url("icons/minimos.svg");
+}
+
+#container #menu a#ecuanolineal{
 	background-image: url("icons/exponencial.svg");
 }
 
