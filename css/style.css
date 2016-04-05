@@ -3,6 +3,17 @@ html, body{
   	font-family: 'Roboto', sans-serif;
 	height: 100%;
 }
+
+.table{
+	display: table;
+}
+.table-row{
+	display: table-row;
+}
+.table-cell{
+	display: table-cell;
+}
+
 #container{
 	position: relative;
 	height: 100%;
@@ -80,7 +91,7 @@ html, body{
 	padding: 10px;
 	padding-left: 40px;
 	background-color: #252525;
-}	
+}
 
 #container #footer-content h3{
 	color: #A0A0A0;

@@ -2,6 +2,7 @@ var n, m, b, min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
 var	sumX = sumY = sumXX = sumXY = 0;
 var $valoresDOM = $('#inputs'),
+		$tablaErrores = $('#tablaErrores'),
 		$btnCalc = '<button type="button" id="btnCalc">Calcular minimos cuadrados</button>',
 		data = {
 			x: [], y: []
@@ -138,10 +139,21 @@ $('body').on('click', '#btnCalc', function(){
 	function errorPorcentual(){
 		se=0;
 		e=[];
+		var $rows = [];
 		for (i=0;i<n;i++){
 			e[i]=Math.abs((data.y[i]-(m*data.x[i]+b))/data.y[i]);
 			se+=e[i];
+			$rows.push($('<div class="table-row">'+
+				'<div class="table-cell">Error '+(i+1)+'</div>'+
+				'<div class="table-cell">'+e[i]+'</div>'+
+			'</div>'))
 		}
+		$rows.push($('<div class="table-row">'+
+			'<div class="table-cell">Error Total</div>'+
+			'<div class="table-cell">'+se+'</div>'+
+		'</div>'))
+
+		$tablaErrores.append($rows);
 
 		console.log(se);
 	}
