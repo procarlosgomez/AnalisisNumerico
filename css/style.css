@@ -73,6 +73,10 @@ html, body{
 	background-image: url("icons/minimos.svg");
 }
 
+#container #menu a#ecuanolineal{
+	background-image: url("icons/exponencial.svg");
+}
+
 
 #container #menu a.selected{
 	cursor: pointer;
