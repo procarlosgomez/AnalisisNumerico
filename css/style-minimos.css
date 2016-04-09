@@ -33,8 +33,12 @@
 	float: left;
 }
 
-#container #tablaErrores .table-row .table-cell:first-child{
+#container #tablaErrores .table-row .table-cell:nth-child(1){
 	width: 100px;
+}
+
+#container #tablaErrores .table-row .table-cell:nth-child(2){
+	text-align: right;
 }
 
 #container #tablaErrores .table-row:last-child .table-cell{
