@@ -142,12 +142,12 @@ $('body').on('click', '#btnCalc', function(){
 		var $rows = [];
 		for (i=0;i<n;i++){
 			e[i]=Math.abs((data.y[i]-(m*data.x[i]+b))/data.y[i]);
-			err_por[i]=e[i]*100;
+			err_por[i] = Math.round((e[i]*100) * 100) / 100
 			
-			se+=e[i];
+			err_por[i]+=e[i];
 			$rows.push($('<div class="table-row">'+
 				'<div class="table-cell">Error '+(i+1)+'</div>'+
-				'<div class="table-cell">'+err_por[i]+'</div>'+
+				'<div class="table-cell">'+ err_por[i]+'</div>'+
 			'</div>'))
 		}
 		$rows.push($('<div class="table-row">'+
