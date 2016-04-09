@@ -36,6 +36,17 @@ $(document).ready(function(){
 //desuscribir evento
 $('body').off('click', '#btnCalc');
 
+$('body').on('click', '.tabs-result a', function(e){
+	e.preventDefault();
+
+	$('.tabs-result a.selected').removeClass('selected');
+	$(this).addClass('selected');
+
+	$('#container .tabs-result > div').removeClass('selected');
+	$('#container .tabs-result > div').eq($(this).index()).addClass('selected');
+
+});
+
 //no existe aun por eso lo hago asi
 $('body').on('click', '#btnCalc', function(){
 	var data = {
@@ -143,9 +154,9 @@ $('body').on('click', '#btnCalc', function(){
 		for (i=0;i<n;i++){
 			e[i]=Math.abs((data.y[i]-(m*data.x[i]+b))/data.y[i]);
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
-			
+
 			se+=err_por[i];
-			
+
 			$rows.push($('<div class="table-row">'+
 				'<div class="table-cell">Error '+(i+1)+'</div>'+
 				'<div class="table-cell">'+ err_por[i]+'%</div>'+

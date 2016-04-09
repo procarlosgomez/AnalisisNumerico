@@ -26,15 +26,24 @@
 	width: 183px;
 }
 
-#container #tabs-result > div{
+#container .tabs-result{
+	padding-left: 15px;
+}
+
+#container .tabs-result a{
+	text-decoration: none;
+	background-color: #ccc;
+}
+
+#container .tabs-result > div{
 	display: none;
 }
-#container #tabs-result > div.selectd{
+#container .tabs-result > div.selected{
 	display: block;;
 }
 
-#container #tabs-result #plotLineal,
-#container #tabs-result #plotCuad{
+#container .tabs-result #plotLineal,
+#container .tabs-result #plotCuad{
 	float: left;
 }
 
