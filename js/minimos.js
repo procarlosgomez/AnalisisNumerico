@@ -148,7 +148,7 @@ $('body').on('click', '#btnCalc', function(){
 			
 			$rows.push($('<div class="table-row">'+
 				'<div class="table-cell">Error '+(i+1)+'</div>'+
-				'<div class="table-cell">'+ err_por[i]+'</div>'+
+				'<div class="table-cell">'+ err_por[i]+'%</div>'+
 			'</div>'))
 		}
 		$rows.push($('<div class="table-row">'+
