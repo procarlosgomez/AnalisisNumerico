@@ -26,6 +26,12 @@
 	width: 183px;
 }
 
+#container #tabs-result > div{
+	display: none;
+}
+#container #tabs-result > div.selectd{
+	display: block;;
+}
 
 #container #tabs-result #plotLineal,
 #container #tabs-result #plotCuad{
