@@ -25,7 +25,10 @@
 	margin-top: 10px;
 	width: 183px;
 }
-#container #plotLineal{
+
+
+#container #tabs-result #plotLineal,
+#container #tabs-result #plotCuad{
 	float: left;
 }
 
