@@ -153,9 +153,10 @@ $('body').on('click', '#btnCalc', function(){
 		}
 		$rows.push($('<div class="table-row">'+
 			'<div class="table-cell">Error Total</div>'+
-			'<div class="table-cell">'+se+'</div>'+
+			'<div class="table-cell">'+se+'%</div>'+
 		'</div>'))
 
+		$tablaErrores.empty();
 		$tablaErrores.append($rows);
 
 		console.log(se);
