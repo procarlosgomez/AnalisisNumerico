@@ -1,6 +1,6 @@
 var n, m, b, min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
-var	sumX = sumY = sumXX = sumXY = 0;
+var	sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0;
 var $valoresDOM = $('#inputs'),
 		$tablaErrores = $('#tablaErrores'),
 		$btnCalc = '<button type="button" id="btnCalc">Calcular minimos cuadrados</button>',
@@ -82,13 +82,15 @@ $('body').on('click', '#btnCalc', function(){
 
 	function sumData(){
 		min = {x: null, y: null}, max={x: null, y: null};
-		sumX = sumY = sumXX = sumXY = 0.0;
-
+		sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0.0;
 		for(var i = 0; i<n; i++){
 			sumX += data.x[i];
 			sumY += data.y[i];
 			sumXX += data.x[i] * data.x[i];
 			sumXY += data.x[i] * data.y[i];
+			sumXXXX += data.x[i] * data.x[i] * data.x[i] * data.x[i];
+			sumXXX += data.x[i] * data.x[i] * data.x[i];
+			sumXXY += data.x[i] * data.x[i] * data.y[i];
 
 			//minimos
 			if(min.x === null)	min.x = data.x[i];
