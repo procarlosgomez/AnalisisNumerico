@@ -147,7 +147,7 @@ $('body').on('click', '#btnCalc', function(){
 		}
 	}
 
-	function errorPorcentual(){
+	function errorPorcentualLineal(){
 		se=0;
 		e=[], err_por=[];
 		var $rows = [];
@@ -175,7 +175,7 @@ $('body').on('click', '#btnCalc', function(){
 
 	if(!hasError){
 		makeLineal();
-		errorPorcentual();
+		errorPorcentualLineal();
 	}
 
 });
