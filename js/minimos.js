@@ -2,7 +2,8 @@ var n, m, b, min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
 var	sumX = sumY = sumXX = sumXY = 0;
 var $valoresDOM = $('#inputs'),
-		$tablaErrores = $('#tablaErrores'),
+		$tablaErroresLineal = $('#resLineal #tablaErrores'),
+		$tablaErroresQuad = $('#resCuad #tablaErrores'),
 		$btnCalc = '<button type="button" id="btnCalc">Calcular minimos cuadrados</button>',
 		data = {
 			x: [], y: []
@@ -167,8 +168,8 @@ $('body').on('click', '#btnCalc', function(){
 			'<div class="table-cell">'+se+'%</div>'+
 		'</div>'))
 
-		$tablaErrores.empty();
-		$tablaErrores.append($rows);
+		$tablaErroresLineal.empty();
+		$tablaErroresLineal.append($rows);
 
 		console.log(se);
 	}
