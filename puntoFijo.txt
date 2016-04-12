@@ -1,0 +1,42 @@
+public class puntoFijo {
+
+    public static void main(String[] args) {
+        double ans = 1, resultado = 0, comparador;
+        int contador = 0;
+        double vect[] = new double[99999];
+        do {
+            comparador = resultado;
+            resultado = Math.pow((ans + 3) / ((Math.pow(ans, 2)) + 2), 0.5);
+            vect[contador] = resultado;
+            ans = resultado;
+            contador += 1;
+            String Indefinido = Double.toString(comparador);
+            //Si la funcion tiene un error por superar el limite de caracteres
+            if (Indefinido.equals("Infinity")) {
+                System.out.println("No es Convergente, excede el limite por exponencial");
+                System.exit(0);
+            }
+            //las interacciones de la fuincion son iguales eje [1,2,1,2,1,2,1,2]
+            if (contador >= 7) {
+                if (vect[contador - 1] == vect[contador - 3] & vect[contador - 1] == vect[contador - 5] &
+                    vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
+                    System.out.println("No es Convergente, iguales");
+                    System.exit(0);
+                }
+                //si es incremental cierra el ciclo
+                if (vect[contador - 6] - vect[contador - 5] > (vect[contador - 5] - vect[contador - 4]) &
+                    vect[contador - 5] - vect[contador - 4] > (vect[contador - 4] - vect[contador - 3]) &
+                    vect[contador - 4] - vect[contador - 3] > (vect[contador - 3] - vect[contador - 2])) {
+                    System.out.println("No es Convergente, incremental");
+                    System.exit(0);
+                }
+            }
+            //System.out.println("posicion: " + contador + " ans= " + resultado);
+        } while (comparador != resultado);
+        //imprime las interacciones cuando es convergente
+        for (int i = 0; i < contador - 1; i++) {
+            System.out.println("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
+        }
+        //imprime el valor convergente y la interaccion
+        System.out.println("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+    }
