@@ -1,6 +1,7 @@
 var n, m, b, min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
-var	sumX = sumY = sumXX = sumXY = 0;
+var sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0;
+var a=b=c=detA=0;
 var $valoresDOM = $('#inputs'),
 		$tablaErroresLineal = $('#resLineal #tablaErrores'),
 		$tablaErroresQuad = $('#resCuad #tablaErrores'),
@@ -83,13 +84,15 @@ $('body').on('click', '#btnCalc', function(){
 
 	function sumData(){
 		min = {x: null, y: null}, max={x: null, y: null};
-		sumX = sumY = sumXX = sumXY = 0.0;
-
+		sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0.0;
 		for(var i = 0; i<n; i++){
 			sumX += data.x[i];
 			sumY += data.y[i];
 			sumXX += data.x[i] * data.x[i];
 			sumXY += data.x[i] * data.y[i];
+			sumXXXX += data.x[i] * data.x[i] * data.x[i] * data.x[i];
+			sumXXX += data.x[i] * data.x[i] * data.x[i];
+			sumXXY += data.x[i] * data.x[i] * data.y[i];
 
 			//minimos
 			if(min.x === null)	min.x = data.x[i];
@@ -148,7 +151,35 @@ $('body').on('click', '#btnCalc', function(){
 		}
 	}
 
-	function errorPorcentualLineal(){
+	function makeCuadratica () {
+		a=b=c=detA=0.0;
+		detA= sumXXXX*(sumXX*n - sumX*sumX)- sumXXX*(sumXXX*n - sumXX*sX) + sumXX*(sumXXX*sumX - sumXX*sumXX);
+		a=(sumXXY*(sumXX*n - sumX*sumX) - sumXXX*(sumXY*n - sumY*sumX) + sumXX*(sumXY*sumX -sumX*sumXX))/detA;
+		b=(sumXXXX*(sumXY*n - sumY*sumX)- sumXXY*(sumXXX*n - sumXX-sumX) + sumXX*(sumXXX*sumY - sumXX*sumX))/detA;
+		C=(sumXXXX*(sumXX*sumY - sumX*sumXY) - sumXXX*(sumXXX*sumY - sumXX*sumXY)+ sumXXY*(sumXXX*sumX - sumXX*sumXX))/detA;
+
+		var points = [];
+		for(i = 0; i<n; i++){
+			points.push([
+				data.x[i], data.y[i]
+			])
+		}
+
+		dataPlot = [{
+				fn: 		a+'x^2+'+b+'x+'+c,
+				sampler:	'builtIn',  // this will make function-plot use the evaluator of math.js
+				graphType:	'polyline'
+			},
+			{
+				points: 	points,
+				fnType: 	'points',
+				graphType:	'scatter'
+			}
+		];
+
+	}
+
+	function errorPorcentual(){
 		se=0;
 		e=[], err_por=[];
 		var $rows = [];
