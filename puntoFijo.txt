@@ -24,9 +24,9 @@ public class puntoFijo {
                     System.exit(0);
                 }
                 //si es incremental cierra el ciclo
-                if (vect[contador - 6] - vect[contador - 5] > (vect[contador - 5] - vect[contador - 4]) &
-                    vect[contador - 5] - vect[contador - 4] > (vect[contador - 4] - vect[contador - 3]) &
-                    vect[contador - 4] - vect[contador - 3] > (vect[contador - 3] - vect[contador - 2])) {
+                if (vect[contador - 6] > vect[contador - 5] & vect[contador - 5] > vect[contador - 4] &
+                    vect[contador - 4] > vect[contador - 3] & vect[contador - 3] > vect[contador - 2] &
+                    vect[contador - 2] > vect[contador - 1]) {
                     System.out.println("No es Convergente, incremental");
                     System.exit(0);
                 }
