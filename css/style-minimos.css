@@ -32,7 +32,13 @@
 
 #container .tabs-result a{
 	text-decoration: none;
-	background-color: #ccc;
+  background-color: #004C80;
+  color: white;
+  padding: 5px 20px;
+}
+
+#container .tabs-result a.selected{
+	background-color: #670080;
 }
 
 #container .tabs-result > div{
