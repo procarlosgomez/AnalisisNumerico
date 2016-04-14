@@ -123,7 +123,7 @@ $('body').on('click', '#btnCalc', function(){
 		}
 
 		dataPlot = [{
-				fn: 				m+'x+'+b,
+				fn: 				m+'x+('+b+')',
 				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
 				graphType:	'polyline'
 			},
@@ -133,6 +133,8 @@ $('body').on('click', '#btnCalc', function(){
 				graphType:	'scatter'
 			}
 		];
+
+		console.log(dataPlot[0].fn);
 
 		try {
 			var instance = functionPlot({
@@ -153,30 +155,47 @@ $('body').on('click', '#btnCalc', function(){
 
 	function makeCuadratica () {
 		a=b=c=detA=0.0;
-		detA= sumXXXX*(sumXX*n - sumX*sumX)- sumXXX*(sumXXX*n - sumXX*sX) + sumXX*(sumXXX*sumX - sumXX*sumXX);
-		a=(sumXXY*(sumXX*n - sumX*sumX) - sumXXX*(sumXY*n - sumY*sumX) + sumXX*(sumXY*sumX -sumX*sumXX))/detA;
-		b=(sumXXXX*(sumXY*n - sumY*sumX)- sumXXY*(sumXXX*n - sumXX-sumX) + sumXX*(sumXXX*sumY - sumXX*sumX))/detA;
-		C=(sumXXXX*(sumXX*sumY - sumX*sumXY) - sumXXX*(sumXXX*sumY - sumXX*sumXY)+ sumXXY*(sumXXX*sumX - sumXX*sumXX))/detA;
-
+		detA= sumXXXX*(sumXX*n - sumX*sumX)- sumXXX*(sumXXX*n - sumXX*sumX) + sumXX*(sumXXX*sumX - sumXX*sumXX);
+		a=(sumXXY*(sumXX*n - sumX*sumX) - sumXXX*(sumXY*n - sumY*sumX) + sumXX*(sumXY*sumX -sumY*sumXX))/detA;
+		b=(sumXXXX*(sumXY*n - sumY*sumX)- sumXXY*(sumXXX*n - sumXX-sumX) + sumXX*(sumXXX*sumY - sumXX*sumXY))/detA;
+		c=(sumXXXX*(sumXX*sumY - sumX*sumXY) - sumXXX*(sumXXX*sumY - sumXX*sumXY)+ sumXXY*(sumXXX*sumX - sumXX*sumXX))/detA;
+		console.log(detA, a, b, c);
 		var points = [];
 		for(i = 0; i<n; i++){
-			points.push([
+			points.push([ 
 				data.x[i], data.y[i]
 			])
 		}
 
 		dataPlot = [{
-				fn: 		a+'x^2+'+b+'x+'+c,
-				sampler:	'builtIn',  // this will make function-plot use the evaluator of math.js
+				fn: 				a+'x^2+('+b+')x+('+c+')',
+				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
 				graphType:	'polyline'
 			},
 			{
-				points: 	points,
-				fnType: 	'points',
+				points: 		points,
+				fnType: 		'points',
 				graphType:	'scatter'
 			}
 		];
 
+		console.log(dataPlot[0].fn);
+
+		try {
+			var instance = functionPlot({
+				target: '#plotCuad',
+				data: dataPlot
+			});
+
+			var xDomain = [min.x-1, max.x+1]
+			var yDomain = [min.y-1, max.y+1]
+			instance.programmaticZoom(xDomain, yDomain)
+
+		}
+			catch (err) {
+		 console.log(err);
+			alert(err);
+		}
 	}
 
 	function errorPorcentualLineal(){
@@ -207,6 +226,7 @@ $('body').on('click', '#btnCalc', function(){
 
 	if(!hasError){
 		makeLineal();
+		makeCuadratica();
 		errorPorcentualLineal();
 	}
 
