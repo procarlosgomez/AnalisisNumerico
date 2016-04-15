@@ -148,7 +148,7 @@ $('body').on('click', '#btnCalc', function(){
 
 		}
 			catch (err) {
-		 console.log(err);
+		 	console.log(err);
 			alert(err);
 		}
 	}
@@ -193,7 +193,7 @@ $('body').on('click', '#btnCalc', function(){
 
 		}
 			catch (err) {
-		 console.log(err);
+		 	console.log(err);
 			alert(err);
 		}
 	}
@@ -206,7 +206,7 @@ $('body').on('click', '#btnCalc', function(){
 			e[i]=Math.abs((data.y[i]-(m*data.x[i]+b))/data.y[i]);
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
 
-			se+=err_por[i];
+			se+=err_por[i]/n;
 
 			$rows.push($('<div class="table-row">'+
 				'<div class="table-cell">Error '+(i+1)+'</div>'+
@@ -228,11 +228,11 @@ $('body').on('click', '#btnCalc', function(){
 		e=[], err_por=[];
 		var $rows = [];
 		for (i=0;i<n;i++){
-			e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c)), 2);
+			e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c), 2));
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
 
-			se+=err_por[i];
-
+			se+=err_por[i]/n;
+ 
 			$rows.push($('<div class="table-row">'+
 				'<div class="table-cell">Error '+(i+1)+'</div>'+
 				'<div class="table-cell">'+ err_por[i]+'%</div>'+
@@ -254,6 +254,7 @@ $('body').on('click', '#btnCalc', function(){
 		makeLineal();
 		makeCuadratica();
 		errorPorcentualLineal();
+		errorPorcentualCuadratico();
 	}
 
 });
