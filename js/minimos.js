@@ -1,7 +1,7 @@
 var a, b, c, n, m, detA;
 var min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
-var sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0;
+var sumX = sumY = sumXX = sumXY = sumXXXX = sumXXX = sumXXY = sumXlnY = sumlnY = 0;
 var $valoresDOM = $('#inputs'),
 		$tablaErroresLineal = $('#resLineal .tablaErrores'),
 		$tablaErroresQuad = $('#resCuad .tablaErrores'),
@@ -93,7 +93,8 @@ $('body').on('click', '#btnCalc', function(){
 			sumXXXX += data.x[i] * data.x[i] * data.x[i] * data.x[i];
 			sumXXX += data.x[i] * data.x[i] * data.x[i];
 			sumXXY += data.x[i] * data.x[i] * data.y[i];
-
+			sumXlnY += data.x[i] * Math.log(data.y[i]);
+			sumlnY += Math.log(data.y[i]);
 			//minimos
 			if(min.x === null)	min.x = data.x[i];
 			else if(data.x[i] < min.x) 	min.x	= data.x[i];
@@ -198,6 +199,48 @@ $('body').on('click', '#btnCalc', function(){
 		}
 	}
 
+	function makeExponencial(){
+		k = m = 0.0;
+		k = ((n*sumXlnY) - (sumX*sumlnY)) / ((n*sumXX)-(sumX*sumX));
+		m= Math.exp(((sumlnY-k*(sumX))/n));
+		var points = [];
+		for(i = 0; i<n; i++){
+			points.push([
+				data.x[i], data.y[i]
+			])
+		}
+
+		dataPlot = [{
+				fn: 				m+'e^('+k+'*x)',
+				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
+				graphType:	'polyline'
+			},
+			{
+				points: 		points,
+				fnType: 		'points',
+				graphType:	'scatter'
+			}
+		];
+
+		console.log(dataPlot[0].fn);
+
+		try {
+			var instance = functionPlot({
+				target: '#plotLineal',
+				data: dataPlot
+			});
+
+			var xDomain = [min.x-1, max.x+1]
+			var yDomain = [min.y-1, max.y+1]
+			instance.programmaticZoom(xDomain, yDomain)
+
+		}
+			catch (err) {
+		 	console.log(err);
+			alert(err);
+		}
+	}
+
 	function errorPorcentualLineal(){
 		se=0;
 		e=[], err_por=[];
@@ -254,6 +297,7 @@ $('body').on('click', '#btnCalc', function(){
 	if(!hasError){
 		makeLineal();
 		makeCuadratica();
+		//makeExponencial();
 		errorPorcentualLineal();
 		errorPorcentualCuadratico();
 	}
