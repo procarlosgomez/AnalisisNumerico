@@ -228,7 +228,7 @@ $('body').on('click', '#btnCalc', function(){
 		e=[], err_por=[];
 		var $rows = [];
 		for (i=0;i<n;i++){
-			e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c)), 2);
+			e[i]=Math.abs(data.y[i]-(a*(data.x[i]*data.x[i]) + (b*data.x[i])+c));
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
 
 			se+=err_por[i];
@@ -254,6 +254,7 @@ $('body').on('click', '#btnCalc', function(){
 		makeLineal();
 		makeCuadratica();
 		errorPorcentualLineal();
+		errorPorcentualCuadratico();
 	}
 
 });
