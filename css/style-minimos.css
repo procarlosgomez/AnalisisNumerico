@@ -55,8 +55,15 @@
 	float: left;
 }
 
-#container .tablaErrores{
+#container .tabs-result .resData{
 	float: left;
+}
+
+#container .resData .Ecuacion{
+	
+}
+#container .resData .tablaErrores{
+	
 }
 
 #container .tablaErrores .table-row .table-cell:nth-child(1){
