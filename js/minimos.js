@@ -211,13 +211,13 @@ $('body').on('click', '#btnCalc', function(){
 		}
 
 		dataPlot = [{
-				fn: 				m+'e^('+k+'*x)',
-				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
+				fn: 		m+'e^('+k+'*x)',
+				sampler:	'builtIn',  // this will make function-plot use the evaluator of math.js
 				graphType:	'polyline'
 			},
 			{
-				points: 		points,
-				fnType: 		'points',
+				points: 	points,
+				fnType: 	'points',
 				graphType:	'scatter'
 			}
 		];
@@ -226,7 +226,7 @@ $('body').on('click', '#btnCalc', function(){
 
 		try {
 			var instance = functionPlot({
-				target: '#plotLineal',
+				target: '#plotExpon',
 				data: dataPlot
 			});
 
@@ -297,7 +297,7 @@ $('body').on('click', '#btnCalc', function(){
 	if(!hasError){
 		makeLineal();
 		makeCuadratica();
-		//makeExponencial();
+		makeExponencial();
 		errorPorcentualLineal();
 		errorPorcentualCuadratico();
 	}
