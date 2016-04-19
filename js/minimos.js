@@ -5,6 +5,7 @@ var sumX = sumY = sumXX = sumXY = sumXXXX = sumXXX = sumXXY = sumXlnY = sumlnY =
 var $valoresDOM = $('#inputs'),
 		$tablaErroresLineal = $('#resLineal .tablaErrores'),
 		$tablaErroresQuad = $('#resCuad .tablaErrores'),
+		$tablaErroresExpon = $('#resExpon .tablaErrores'),
 		$btnCalc = '<button type="button" id="btnCalc">Calcular minimos cuadrados</button>',
 		data = {
 			x: [], y: []
@@ -271,7 +272,34 @@ $('body').on('click', '#btnCalc', function(){
 		e=[], err_por=[];
 		var $rows = [];
 		for (i=0;i<n;i++){
-			e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c), 2));
+			//e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c), 2));
+			e[i]=Math.abs(data.y[i]-(a*(data.x[i]*data.x[i]) + (b*data.x[i])+c));
+			err_por[i] = Math.round((e[i]*100) * 100) / 100
+
+			se+=err_por[i]/n;
+
+			$rows.push($('<div class="table-row">'+
+				'<div class="table-cell">Error '+(i+1)+'</div>'+
+				'<div class="table-cell">'+ err_por[i]+'%</div>'+
+			'</div>'))
+		}
+		$rows.push($('<div class="table-row">'+
+			'<div class="table-cell">Error Total</div>'+
+			'<div class="table-cell">'+se+'%</div>'+
+		'</div>'))
+
+		$tablaErroresQuad
+			.empty()
+			.append($rows);
+
+		console.log(se);
+	}
+		function errorPorcentualExponencial(){
+		se=0;
+		e=[], err_por=[];
+		var $rows = [];
+		for (i=0;i<n;i++){
+			//e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c), 2));
 			e[i]=Math.abs(data.y[i]-(a*(data.x[i]*data.x[i]) + (b*data.x[i])+c));
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
 
