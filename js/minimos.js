@@ -328,6 +328,7 @@ $('body').on('click', '#btnCalc', function(){
 		makeExponencial();
 		errorPorcentualLineal();
 		errorPorcentualCuadratico();
+		errorPorcentualExponencial();
 	}
 
 });
