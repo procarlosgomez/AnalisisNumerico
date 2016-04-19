@@ -137,6 +137,9 @@ $('body').on('click', '#btnCalc', function(){
 		];
 
 		console.log(dataPlot[0].fn);
+		$('#resLineal .Ecuacion').empty().html(dataPlot[0].fn);
+		
+		
 
 		try {
 			var instance = functionPlot({
@@ -182,6 +185,7 @@ $('body').on('click', '#btnCalc', function(){
 		];
 
 		console.log(dataPlot[0].fn);
+		$('#resCuad .Ecuacion').empty().html(dataPlot[0].fn);
 
 		try {
 			var instance = functionPlot({
@@ -224,6 +228,7 @@ $('body').on('click', '#btnCalc', function(){
 		];
 
 		console.log(dataPlot[0].fn);
+		$('#resExpon .Ecuacion').empty().html(dataPlot[0].fn);
 
 		try {
 			var instance = functionPlot({
