@@ -211,7 +211,7 @@ $('body').on('click', '#btnCalc', function(){
 		}
 
 		dataPlot = [{
-				fn: 		m+'e^('+k+'*x)',
+				fn: 		m+'*exp('+k+'*x)',
 				sampler:	'builtIn',  // this will make function-plot use the evaluator of math.js
 				graphType:	'polyline'
 			},
