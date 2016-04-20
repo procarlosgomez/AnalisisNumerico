@@ -48,6 +48,7 @@ $('body').on('click', '.tabs-result a', function(e){
 	$('#container .tabs-result > div').removeClass('selected');
 	$('#container .tabs-result > div').eq($(this).index()).addClass('selected');
 
+	$('#container #btnCalc').click();
 });
 
 //no existe aun por eso lo hago asi
@@ -149,7 +150,6 @@ $('body').on('click', '#btnCalc', function(){
 			var xDomain = [min.x-1, max.x+1]
 			var yDomain = [min.y-1, max.y+1]
 			instance.programmaticZoom(xDomain, yDomain)
-
 		}
 			catch (err) {
 		 	console.log(err);
@@ -226,7 +226,7 @@ $('body').on('click', '#btnCalc', function(){
 			}
 		];
 
-		var func = 'f(x)='+(Math.round(m*100)/100)+'*exp('+(Math.round(k*100)/100)+'*x)';
+		var func = (Math.round(m*100)/100)+'*exp('+(Math.round(k*100)/100)+'*x)';
 		$('#resExpon .Ecuacion').empty().html('f(x)='+func);
 
 		try {
@@ -327,12 +327,22 @@ $('body').on('click', '#btnCalc', function(){
 	}
 
 	if(!hasError){
-		makeLineal();
-		makeCuadratica();
-		makeExponencial();
-		errorPorcentualLineal();
-		errorPorcentualCuadratico();
-		errorPorcentualExponencial();
+		var index = $('.tabs-result a.selected').index();
+
+		switch (index) {
+			case 0:
+				makeLineal();
+				errorPorcentualLineal();
+				break;
+			case 1:
+				makeCuadratica();
+				errorPorcentualCuadratico();
+				break;
+			case 2:
+				makeExponencial();
+				errorPorcentualExponencial();
+				break;
+		}
 	}
 
 });
