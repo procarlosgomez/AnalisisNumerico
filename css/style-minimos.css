@@ -68,3 +68,15 @@
 #container #tablaErrores .table-row:last-child .table-cell{
 	padding-top: 10px;
 }
+
+@media (max-width: 600px) {
+	.table, .table-row, .table-cell{
+		display: block;
+	}
+	.table-cell{
+		float: left;
+	}
+	#container .tabs-result a{
+		display: block;
+	}
+}
