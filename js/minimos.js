@@ -1,4 +1,4 @@
-var a, b, c, n, m, detA;
+var a, b, c, n, m, k, detA;
 var min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
 var sumX = sumY = sumXX = sumXY = sumXXXX = sumXXX = sumXXY = sumXlnY = sumlnY = 0;
@@ -138,8 +138,8 @@ $('body').on('click', '#btnCalc', function(){
 
 		console.log(dataPlot[0].fn);
 		$('#resLineal .Ecuacion').empty().html(dataPlot[0].fn);
-		
-		
+
+
 
 		try {
 			var instance = functionPlot({
@@ -216,13 +216,13 @@ $('body').on('click', '#btnCalc', function(){
 		}
 
 		dataPlot = [{
-				fn: 		m+'*exp('+k+'*x)',
-				sampler:	'builtIn',  // this will make function-plot use the evaluator of math.js
+				fn: 				m+'*exp('+k+'*x)',
+				sampler:		'builtIn',  // this will make function-plot use the evaluator of math.js
 				graphType:	'polyline'
 			},
 			{
-				points: 	points,
-				fnType: 	'points',
+				points: 		points,
+				fnType: 		'points',
 				graphType:	'scatter'
 			}
 		];
@@ -299,13 +299,13 @@ $('body').on('click', '#btnCalc', function(){
 
 		console.log(se);
 	}
-	
+
 	function errorPorcentualExponencial(){
 		se=0;
 		e=[], err_por=[];
 		var $rows = [];
 		for (i=0;i<n;i++){
-			e[i]=Math.abs(data.y[i]-(a*(data.x[i]*data.x[i]) + (b*data.x[i])+c));
+			e[i]=Math.abs((data.y[i]-( m*Math.exp(k*data.x[i]) ))/data.y[i]);
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
 
 			se+=err_por[i]/n;
