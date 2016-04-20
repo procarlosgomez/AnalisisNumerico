@@ -1,10 +1,11 @@
 var a, b, c, n, m, detA;
 var min = {x: null, y: null}, max={x: null, y: null};
 var hasError = false;
-var sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0;
+var sumX = sumY = sumXX = sumXY = sumXXXX = sumXXX = sumXXY = sumXlnY = sumlnY = 0;
 var $valoresDOM = $('#inputs'),
 		$tablaErroresLineal = $('#resLineal .tablaErrores'),
 		$tablaErroresQuad = $('#resCuad .tablaErrores'),
+		$tablaErroresExpon = $('#resExpon .tablaErrores'),
 		$btnCalc = '<button type="button" id="btnCalc">Calcular minimos cuadrados</button>',
 		data = {
 			x: [], y: []
@@ -93,7 +94,8 @@ $('body').on('click', '#btnCalc', function(){
 			sumXXXX += data.x[i] * data.x[i] * data.x[i] * data.x[i];
 			sumXXX += data.x[i] * data.x[i] * data.x[i];
 			sumXXY += data.x[i] * data.x[i] * data.y[i];
-
+			sumXlnY += data.x[i] * Math.log(data.y[i]);
+			sumlnY += Math.log(data.y[i]);
 			//minimos
 			if(min.x === null)	min.x = data.x[i];
 			else if(data.x[i] < min.x) 	min.x	= data.x[i];
@@ -135,6 +137,9 @@ $('body').on('click', '#btnCalc', function(){
 		];
 
 		console.log(dataPlot[0].fn);
+		$('#resLineal .Ecuacion').empty().html(dataPlot[0].fn);
+		
+		
 
 		try {
 			var instance = functionPlot({
@@ -148,7 +153,7 @@ $('body').on('click', '#btnCalc', function(){
 
 		}
 			catch (err) {
-		 console.log(err);
+		 	console.log(err);
 			alert(err);
 		}
 	}
@@ -180,6 +185,7 @@ $('body').on('click', '#btnCalc', function(){
 		];
 
 		console.log(dataPlot[0].fn);
+		$('#resCuad .Ecuacion').empty().html(dataPlot[0].fn);
 
 		try {
 			var instance = functionPlot({
@@ -193,7 +199,50 @@ $('body').on('click', '#btnCalc', function(){
 
 		}
 			catch (err) {
-		 console.log(err);
+		 	console.log(err);
+			alert(err);
+		}
+	}
+
+	function makeExponencial(){
+		k = m = 0.0;
+		k = ((n*sumXlnY) - (sumX*sumlnY)) / ((n*sumXX)-(sumX*sumX));
+		m= Math.exp(((sumlnY-k*(sumX))/n));
+		var points = [];
+		for(i = 0; i<n; i++){
+			points.push([
+				data.x[i], data.y[i]
+			])
+		}
+
+		dataPlot = [{
+				fn: 		m+'*exp('+k+'*x)',
+				sampler:	'builtIn',  // this will make function-plot use the evaluator of math.js
+				graphType:	'polyline'
+			},
+			{
+				points: 	points,
+				fnType: 	'points',
+				graphType:	'scatter'
+			}
+		];
+
+		console.log(dataPlot[0].fn);
+		$('#resExpon .Ecuacion').empty().html(dataPlot[0].fn);
+
+		try {
+			var instance = functionPlot({
+				target: '#plotExpon',
+				data: dataPlot
+			});
+
+			var xDomain = [min.x-1, max.x+1]
+			var yDomain = [min.y-1, max.y+1]
+			instance.programmaticZoom(xDomain, yDomain)
+
+		}
+			catch (err) {
+		 	console.log(err);
 			alert(err);
 		}
 	}
@@ -228,10 +277,11 @@ $('body').on('click', '#btnCalc', function(){
 		e=[], err_por=[];
 		var $rows = [];
 		for (i=0;i<n;i++){
+			//e[i]=Math.abs(Math.pow(data.y[i]-((data.x[i]*data.x[i]) + (b*data.x[i])+c), 2));
 			e[i]=Math.abs(data.y[i]-(a*(data.x[i]*data.x[i]) + (b*data.x[i])+c));
 			err_por[i] = Math.round((e[i]*100) * 100) / 100
 
-			se+=err_por[i];
+			se+=err_por[i]/n;
 
 			$rows.push($('<div class="table-row">'+
 				'<div class="table-cell">Error '+(i+1)+'</div>'+
@@ -249,12 +299,41 @@ $('body').on('click', '#btnCalc', function(){
 
 		console.log(se);
 	}
+	
+	function errorPorcentualExponencial(){
+		se=0;
+		e=[], err_por=[];
+		var $rows = [];
+		for (i=0;i<n;i++){
+			e[i]=Math.abs(data.y[i]-(a*(data.x[i]*data.x[i]) + (b*data.x[i])+c));
+			err_por[i] = Math.round((e[i]*100) * 100) / 100
+
+			se+=err_por[i]/n;
+
+			$rows.push($('<div class="table-row">'+
+				'<div class="table-cell">Error '+(i+1)+'</div>'+
+				'<div class="table-cell">'+ err_por[i]+'%</div>'+
+			'</div>'))
+		}
+		$rows.push($('<div class="table-row">'+
+			'<div class="table-cell">Error Total</div>'+
+			'<div class="table-cell">'+se+'%</div>'+
+		'</div>'))
+
+		$tablaErroresExpon
+			.empty()
+			.append($rows);
+
+		console.log(se);
+	}
 
 	if(!hasError){
 		makeLineal();
 		makeCuadratica();
+		makeExponencial();
 		errorPorcentualLineal();
 		errorPorcentualCuadratico();
+		errorPorcentualExponencial();
 	}
 
 });

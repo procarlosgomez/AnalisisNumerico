@@ -49,23 +49,32 @@
 }
 
 #container .tabs-result #plotLineal,
-#container .tabs-result #plotCuad{
+#container .tabs-result #plotCuad,
+#container .tabs-result #plotExpon
+{
 	float: left;
 }
 
-#container #tablaErrores{
+#container .tabs-result .resData{
 	float: left;
 }
 
-#container #tablaErrores .table-row .table-cell:nth-child(1){
+#container .resData .Ecuacion{
+	
+}
+#container .resData .tablaErrores{
+	
+}
+
+#container .tablaErrores .table-row .table-cell:nth-child(1){
 	width: 100px;
 }
 
-#container #tablaErrores .table-row .table-cell:nth-child(2){
+#container .tablaErrores .table-row .table-cell:nth-child(2){
 	text-align: right;
 }
 
-#container #tablaErrores .table-row:last-child .table-cell{
+#container .tablaErrores .table-row:last-child .table-cell{
 	padding-top: 10px;
 }
 
