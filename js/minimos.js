@@ -140,9 +140,6 @@ $('body').on('click', '#btnCalc', function(){
 		var func = (Math.round(m*100)/100)+'x+('+(Math.round(b*100)/100)+')';
 		$('#resLineal .Ecuacion').empty().html('f(x)='+func);
 
-		console.log(dataPlot[0].fn);
-		$('#resLineal .Ecuacion').empty().html(dataPlot[0].fn);
-
 		try {
 			var instance = functionPlot({
 				target: '#plotLineal',
