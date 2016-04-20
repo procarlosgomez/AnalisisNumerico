@@ -136,10 +136,8 @@ $('body').on('click', '#btnCalc', function(){
 			}
 		];
 
-		console.log(dataPlot[0].fn);
-		$('#resLineal .Ecuacion').empty().html(dataPlot[0].fn);
-		
-		
+		var func = (Math.round(m*100)/100)+'x+('+(Math.round(b*100)/100)+')';
+		$('#resLineal .Ecuacion').empty().html('f(x)='+func);
 
 		try {
 			var instance = functionPlot({
@@ -184,8 +182,8 @@ $('body').on('click', '#btnCalc', function(){
 			}
 		];
 
-		console.log(dataPlot[0].fn);
-		$('#resCuad .Ecuacion').empty().html(dataPlot[0].fn);
+		var func = (Math.round(a*100)/100)+'x^2+('+(Math.round(b*100)/100)+')x+('+(Math.round(c*100)/100)+')'
+		$('#resCuad .Ecuacion').empty().html('f(x)='+func);
 
 		try {
 			var instance = functionPlot({
@@ -227,8 +225,8 @@ $('body').on('click', '#btnCalc', function(){
 			}
 		];
 
-		console.log(dataPlot[0].fn);
-		$('#resExpon .Ecuacion').empty().html(dataPlot[0].fn);
+		var func = 'f(x)='+(Math.round(m*100)/100)+'*exp('+(Math.round(k*100)/100)+'*x)';
+		$('#resExpon .Ecuacion').empty().html('f(x)='+func);
 
 		try {
 			var instance = functionPlot({
@@ -299,7 +297,7 @@ $('body').on('click', '#btnCalc', function(){
 
 		console.log(se);
 	}
-	
+
 	function errorPorcentualExponencial(){
 		se=0;
 		e=[], err_por=[];

@@ -1,6 +1,6 @@
 #container #main-minimos{
 	padding: 2%;
-	width: 100%;
+	padding-top: 5%;
 }
 #container #form{
 	position:left;
@@ -60,10 +60,12 @@
 }
 
 #container .resData .Ecuacion{
-	
+	padding-bottom: 10px;
+	color: #0181CC;
+	font-size: 18px;
 }
 #container .resData .tablaErrores{
-	
+
 }
 
 #container .tablaErrores .table-row .table-cell:nth-child(1){
@@ -78,14 +80,31 @@
 	padding-top: 10px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
 	.table, .table-row, .table-cell{
 		display: block;
 	}
 	.table-cell{
 		float: left;
 	}
+	#container .tabs-result{
+		display: block;
+		width: 100%;
+		padding: 0;
+	}
 	#container .tabs-result a{
 		display: block;
+		margin-top: 5px;
+	}
+	#container .tabs-result > div.selected{
+		min-height: 200px;
+	}
+	#container #footer{
+		margin-top: 40px;
+		position: relative;
+		top: initial; bottom: initial;
+		left: initial; right: initial;
+		float: left;
+		width: 100%;
 	}
 }
