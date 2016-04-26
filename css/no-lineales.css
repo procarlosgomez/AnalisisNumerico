@@ -20,6 +20,13 @@ background-color: #670080;
   margin-top:20px;
   margin-bottom:5px;
 }
+#main-nolineal #entradas input{
+  width:calc(100% - 20px);
+}
+#main-nolineal #entradas .equal{
+  display:inline-block;
+  width: 20px;
+}
 #main-nolineal #entradas .datos{
   display:none;
 }
