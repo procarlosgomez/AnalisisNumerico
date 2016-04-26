@@ -7,6 +7,8 @@ text-decoration: none;
   background-color: #004C80;
   color: white;
   padding: 5px 20px;
+  margin-top:5px;
+  display:block;
 }
 #main-nolineal #entradas a.selected{
 background-color: #670080;
