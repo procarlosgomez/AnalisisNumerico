@@ -1,3 +1,7 @@
+#main-nolineal #entradas{
+  width:200px;
+}
+
 #main-nolineal #entradas a{
 text-decoration: none;
   background-color: #004C80;
@@ -9,4 +13,7 @@ background-color: #670080;
 }
 #main-nolineal #entradas .datos{
   display:none;
+}
+#main-nolineal #entradas .selected{
+  display:block;
 }
