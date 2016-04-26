@@ -7,3 +7,6 @@ text-decoration: none;
 #main-nolineal #entradas a.selected{
 background-color: #670080;
 }
+#main-nolineal #entradas .datos{
+  display:none;
+}
