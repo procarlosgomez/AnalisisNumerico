@@ -21,12 +21,12 @@ background-color: #670080;
   margin-bottom:5px;
 }
 #main-nolineal #entradas input{
-  width:calc(100% - 45px);
+  width:calc(100% - 25px);
   box-sizing:border-box;
 }
 #main-nolineal #entradas .equal{
   display:inline-block;
-  width: 45px;
+  width: 25px;
 }
 #main-nolineal #entradas .datos{
   display:none;
