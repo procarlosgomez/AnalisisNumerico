@@ -86,7 +86,7 @@ $('body').on('click', '#btnCalc', function(){
 
 	function sumData(){
 		min = {x: null, y: null}, max={x: null, y: null};
-		sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY=0.0;
+		sumX = sumY = sumXX = sumXY = sumXXXX= sumXXX = sumXXY= sumXlnY = sumlnY = 0.0;
 		for(var i = 0; i<n; i++){
 			sumX += data.x[i];
 			sumY += data.y[i];
