@@ -1,0 +1,17 @@
+create table tblErrores(
+contador int not null IDENTITY(1,1),
+getError varchar (250) not null,
+getInputs varchar (250) not null
+)
+
+create table tblLog(
+contador int not null IDENTITY(1,1),
+ip varchar(20) not null
+)
+
+//son los sxripts para insertar los valores en las tablas
+insert into tblErrores (getError, getInputs) values ('getError','getInputs')
+insert into tblLog (ip) values ('ip')
+
+//muestra la cantidad de log.
+select count(contador) from tblErrores
