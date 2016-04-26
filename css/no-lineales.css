@@ -17,12 +17,24 @@ background-color: #670080;
 }
 #main-nolineal #entradas label{
   display: block;
-  margin-top:10px;
+  margin-top:20px;
   margin-bottom:5px;
+}
+#main-nolineal #entradas input{
+  width:calc(100% - 17px);
+  box-sizing:border-box;
+  padding:5px;
+}
+#main-nolineal #entradas .equal{
+  display:inline-block;
+  width: 17px;
 }
 #main-nolineal #entradas .datos{
   display:none;
 }
 #main-nolineal #entradas .selected{
   display:block;
+}
+#main-nolineal #entradas buttom{
+  margin-top:5px;
 }
