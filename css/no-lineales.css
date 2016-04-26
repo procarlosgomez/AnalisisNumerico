@@ -23,7 +23,7 @@ background-color: #670080;
 #main-nolineal #entradas input{
   width:calc(100% - 17px);
   box-sizing:border-box;
-  padding:6px;
+  padding:5px;
 }
 #main-nolineal #entradas .equal{
   display:inline-block;
