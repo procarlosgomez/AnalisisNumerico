@@ -35,3 +35,6 @@ background-color: #670080;
 #main-nolineal #entradas .selected{
   display:block;
 }
+#main-nolineal #entradas buttom{
+  margin-top:5px;
+}
