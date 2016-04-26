@@ -322,8 +322,6 @@ $('body').on('click', '#btnCalc', function(){
 		$tablaErroresExpon
 			.empty()
 			.append($rows);
-
-		console.log(se);
 	}
 
 	if(!hasError){
