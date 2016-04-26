@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Mínimos Cuadrados- Análisis Numérico</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<meta name="HandheldFriendly" content="true" />
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900' rel='stylesheet' type='text/css'>
+		<link href="css/style.css" rel='stylesheet' type='text/css'>
+		<link href="css/style-minimos.css" rel='stylesheet' type='text/css'>
+	</head>
+	<body>
+		<div id="container">
+			<div id="bg"></div>
+			<div id="header">
+				<b href="index.html">
+				<img src="images\LogoUnitec.png"/>
+				</b>
+				<a href="https://github.com/Dyeudiel/AnalisisNumerico" target="_blank"><img src="images\github-logo.svg"/>
+				<div>VER EN GITHUB</div></a>
+			</div>
+
+			<div id="main-minimos">
+				<div class="table">
+					<div class="table-row">
+						<div class="table-cell" id="column-left">
+							<form id="formulario">
+								<label for="eq">Ingrese la cantidad de valores de la muestra:</label><br>
+								<input type="number" id="NMuestra" value="" />
+								<input type="submit" id="btnContinuar" value="Continuar" />
+								<input type="button" id="Cancelar" value="Cancelar">
+							</form>
+							<div id="inputs"></div>
+						</div>
+						<div class="table-cell tabs-result">
+							<a href="#" class="selected">Modelo lineal</a>
+							<a href="#">Modelo cuadrático</a>
+							<a href="#">Modelo Exponencial</a>
+							<div id="resLineal" class="selected">
+								<div id="plotLineal"></div>
+								<div class="resData">
+									<div class="Ecuacion"></div>
+									<div class="table tablaErrores"></div>
+								</div>
+							</div>
+							<div id="resCuad">
+								<div id="plotCuad"></div>
+								<div class="resData">
+									<div class="Ecuacion"></div>
+									<div class="table tablaErrores"></div>
+								</div>
+							</div>
+							<div id="resExpon">
+								<div id="plotExpon"></div>
+								<div class="resData">
+									<div class="Ecuacion"></div>
+									<div class="table tablaErrores"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="footer">
+				<div id="footer-content">
+				<h3>LIZBET CADAVID
+					<div>68142529</div></h3>
+				<h3>SAID MOYA
+					<div>68142524</div></h3>
+				<h3>YEUDIEL DIAZ
+					<div>68131504</div></h3>
+				</div>
+			</div>
+		</div>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/d3.min.js"></script>
+		<script src="js/function-plot.js"></script>
+		<script src="js/minimos.js"></script>
+	</body>
+</html>
