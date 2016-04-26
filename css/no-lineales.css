@@ -18,7 +18,7 @@ background-color: #670080;
 #main-nolineal #entradas label{
   display: block;
   margin-top:10px;
-  margin-bottom:1,5;
+  margin-bottom:5px;
 }
 #main-nolineal #entradas .datos{
   display:none;
