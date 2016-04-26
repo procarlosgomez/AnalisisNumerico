@@ -4,6 +4,7 @@ getError varchar (250) not null,
 getInputs varchar (250) not null
 )
 
+
 create table tblLog(
 contador int not null IDENTITY(1,1),
 ip varchar(20) not null
