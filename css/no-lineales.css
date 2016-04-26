@@ -8,7 +8,7 @@ text-decoration: none;
   background-color: #004C80;
   color: white;
   padding: 5px 20px;
-  padding-left:8px;
+  padding-left:10px;
   margin-top:5px;
   display:block;
 }
@@ -21,11 +21,12 @@ background-color: #670080;
   margin-bottom:5px;
 }
 #main-nolineal #entradas input{
-  width:calc(100% - 20px);
+  width:calc(100% - 40px);
+  box-sizing:border-box;
 }
 #main-nolineal #entradas .equal{
   display:inline-block;
-  width: 20px;
+  width: 40px;
 }
 #main-nolineal #entradas .datos{
   display:none;
