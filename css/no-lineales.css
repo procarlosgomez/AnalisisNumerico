@@ -21,6 +21,8 @@ background-color: #670080;
   margin-bottom:5px;
 }
 #main-nolineal #entradas input{
+  margin-top:20px;
+  margin-bottom:5px;
   width:calc(100% - 17px);
   box-sizing:border-box;
   padding:5px;
@@ -36,5 +38,5 @@ background-color: #670080;
   display:block;
 }
 #main-nolineal #entradas buttom{
-  margin-top:5px;
+  
 }
