@@ -4,16 +4,18 @@ $(document).ready(function(){
 	};
 })
 
-function puntoFijo(){
+function puntoFijo(ecuacion){
   var x = 1;
   var resultado = 0;
   var comparador;
   var contador = 0;
   var vect = [99999];
+
+
   do {
       comparador = resultado;
       //Convergente
-      resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
+      resultado = math.eval(ecuacion, {x: x});
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
       //excede el limite por exponencial
@@ -97,5 +99,19 @@ function newtonRaphson(){
   console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
-puntoFijo();
-newtonRaphson();
+$('form').on('submit', function(){
+	var fun = $('#entradas a.selected').index();
+
+	data = $(this).find('.datos.selected input').val();
+
+	switch (fun) {
+		case 0:
+			puntoFijo(data);
+			break;
+	}
+
+	//((x+3)/(x^2+2))^1/2
+
+});
+/*puntoFijo();
+newtonRaphson();*/
