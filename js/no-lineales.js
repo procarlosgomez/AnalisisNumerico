@@ -57,7 +57,12 @@ function puntoFijo(ecuacion){
 }
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
-  var resultado = 0, comparador;
+	if(math.eval(dEcuacion, {x}) === 0){
+		alert('La derivada de la funcion no debe ser igual a 0')
+		return;
+	}
+
+	var resultado = 0, comparador;
   var contador = 0;
   var vect = [99999];
 
@@ -115,8 +120,10 @@ $('form').on('submit', function(){
 			break;
 		case 1:
 			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
-			var xIni = parseInt($(this).find('.datos.selected .dEcuacion').val());
+			var xIni = parseInt($(this).find('.datos.selected .xIni').val());
 			newtonRaphson(data, dEcuacion, xIni);
+			break;
+		case 2:
 			break;
 	}
 
