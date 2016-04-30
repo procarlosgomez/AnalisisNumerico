@@ -104,7 +104,7 @@ $('#entradas a').on('click', function(e){
 	$('#entradas a').removeClass('selected');
 	$(this).addClass('selected');
 	$('#entradas .datos').removeClass('selected');
-	$('#entradas .datos').eq($(this).index())
+	$('#entradas .datos').eq($(this).index()).addClass('selected');
 });
 
 $('form').on('submit', function(){
