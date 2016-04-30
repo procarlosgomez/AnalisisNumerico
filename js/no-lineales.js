@@ -56,17 +56,22 @@ function puntoFijo(ecuacion){
   console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
-function newtonRaphson(){
-  var Pn = 3, resultado = 0, comparador;
+function newtonRaphson(ecuacion, dEcuacion, xIni){
+  var resultado = 0, comparador;
   var contador = 0;
   var vect = [99999];
+
+	var x = Xini;
   do {
       comparador = resultado;
+
       //Pn - (f(x)/f'(x));
       //succesfull
-      resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
+			resultado = x - (math.eval(ecuacion, {x: x})/math.eval(dEcuacion, {x: x}));
+
+      //resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
       vect[contador] = resultado;
-      Pn = resultado;
+      x = resultado;
       contador += 1;
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
@@ -102,11 +107,16 @@ function newtonRaphson(){
 $('form').on('submit', function(){
 	var fun = $('#entradas a.selected').index();
 
-	data = $(this).find('.datos.selected input').val();
+	var data = $(this).find('.datos.selected .ecuacion').val();
 
 	switch (fun) {
 		case 0:
 			puntoFijo(data);
+			break;
+		case 1:
+			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
+			var xIni = parseInt($(this).find('.datos.selected .dEcuacion').val());
+			newtonRaphson(data, dEcuacion, xIni);
 			break;
 	}
 
