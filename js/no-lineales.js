@@ -99,6 +99,13 @@ function newtonRaphson(){
   console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
+$('#entradas a').on('click', function(e){
+	e.preventDefault();
+	$('#entradas a').removeClass('selected');
+	$(this).addClass('selected');
+	$('#entradas .datos').removeClass('selected');
+	$('#entradas .datos').eq($(this).index())
+	}
 $('form').on('submit', function(){
 	var fun = $('#entradas a.selected').index();
 
