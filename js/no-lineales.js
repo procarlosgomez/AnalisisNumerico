@@ -9,8 +9,7 @@ function puntoFijo(ecuacion){
   var resultado = 0;
   var comparador;
   var contador = 0;
-  var vect = [99999];
-
+  var vect = [];
 
   do {
       comparador = resultado;
@@ -117,7 +116,8 @@ $('#entradas a').on('click', function(e){
 	$('#entradas .datos').eq($(this).index()).addClass('selected');
 });
 
-$('form').on('submit', function(){
+$('form').on('submit', function(e){
+	e.preventDefault();
 	var fun = $('#entradas a.selected').index();
 
 	var data = $(this).find('.datos.selected .ecuacion').val();
