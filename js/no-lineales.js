@@ -12,7 +12,7 @@ function puntoFijo(){
   var vect = [99999];
   do {
       comparador = resultado;
-      //Convergente
+      //Convergente.
       resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
