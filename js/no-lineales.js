@@ -4,16 +4,20 @@ $(document).ready(function(){
 	};
 })
 
-function puntoFijo(){
+function puntoFijo(ecuacion){
   var x = 1;
   var resultado = 0;
   var comparador;
   var contador = 0;
   var vect = [99999];
+
+
   do {
       comparador = resultado;
       //Convergente.
-      resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
+      //resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
+      //Convergente
+      resultado = math.eval(ecuacion, {x: x});
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
       //excede el limite por exponencial
@@ -54,17 +58,27 @@ function puntoFijo(){
   console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
-function newtonRaphson(){
-  var Pn = 3, resultado = 0, comparador;
+function newtonRaphson(ecuacion, dEcuacion, xIni){
+	if(math.eval(dEcuacion, {x}) === 0){
+		alert('La derivada de la funcion no debe ser igual a 0')
+		return;
+	}
+
+	var resultado = 0, comparador;
   var contador = 0;
   var vect = [99999];
+
+	var x = Xini;
   do {
       comparador = resultado;
+
       //Pn - (f(x)/f'(x));
       //succesfull
-      resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
+			resultado = x - (math.eval(ecuacion, {x: x})/math.eval(dEcuacion, {x: x}));
+
+      //resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
       vect[contador] = resultado;
-      Pn = resultado;
+      x = resultado;
       contador += 1;
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
@@ -97,5 +111,34 @@ function newtonRaphson(){
   console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
-puntoFijo();
-newtonRaphson();
+$('#entradas a').on('click', function(e){
+	e.preventDefault();
+	$('#entradas a').removeClass('selected');
+	$(this).addClass('selected');
+	$('#entradas .datos').removeClass('selected');
+	$('#entradas .datos').eq($(this).index()).addClass('selected');
+});
+
+$('form').on('submit', function(){
+	var fun = $('#entradas a.selected').index();
+
+	var data = $(this).find('.datos.selected .ecuacion').val();
+
+	switch (fun) {
+		case 0:
+			puntoFijo(data);
+			break;
+		case 1:
+			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
+			var xIni = parseInt($(this).find('.datos.selected .xIni').val());
+			newtonRaphson(data, dEcuacion, xIni);
+			break;
+		case 2:
+			break;
+	}
+
+	//((x+3)/(x^2+2))^1/2
+
+});
+/*puntoFijo();
+newtonRaphson();*/
