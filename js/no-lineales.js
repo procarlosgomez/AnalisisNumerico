@@ -13,6 +13,8 @@ function puntoFijo(ecuacion){
 
   do {
       comparador = resultado;
+      //Convergente.
+      //resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
       //Convergente
       resultado = math.eval(ecuacion, {x: x});
       //son iguales
