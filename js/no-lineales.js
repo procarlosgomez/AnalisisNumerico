@@ -58,7 +58,7 @@ function puntoFijo(ecuacion){
 }
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
-	if(math.eval(dEcuacion, {x}) === 0){
+	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		alert('La derivada de la funcion no debe ser igual a 0')
 		return;
 	}
@@ -67,13 +67,14 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
   var contador = 0;
   var vect = [99999];
 
-	var x = Xini;
+	var x = xIni;
   do {
       comparador = resultado;
 
       //Pn - (f(x)/f'(x));
       //succesfull
-			resultado = x - (math.eval(ecuacion, {x: x})/math.eval(dEcuacion, {x: x}));
+
+			resultado = x - (math.eval(ecuacion+'/'+dEcuacion, {x: x}));
 
       //resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
       vect[contador] = resultado;
