@@ -58,7 +58,6 @@ function puntoFijo(ecuacion){
 }
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
-	console.log(math.eval(dEcuacion, {x: xIni}));
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		alert('La derivada de la funcion no debe ser igual a 0')
 		return;
@@ -80,7 +79,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       //resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
       vect[contador] = resultado;
       x = resultado;
-      contador += 1;
+      contador++;
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
       if (Indefinido==("Infinity")) {
