@@ -19,6 +19,7 @@ function puntoFijo(ecuacion){
       resultado = math.eval(ecuacion, {x: x});
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
+      //excede el limite por exponencial
       //resultado = Math.pow((x+2),2);
       //incremental
 
@@ -57,6 +58,7 @@ function puntoFijo(ecuacion){
 }
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
+	console.log(math.eval(dEcuacion, {x: xIni}));
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		alert('La derivada de la funcion no debe ser igual a 0')
 		return;
@@ -130,7 +132,7 @@ $('form').on('submit', function(e){
 			break;
 		case 1:
 			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
-			var xIni = parseInt($(this).find('.datos.selected .xIni').val());
+			var xIni = parseFloat($(this).find('.datos.selected .xIni').val());
 			newtonRaphson(data, dEcuacion, xIni);
 			break;
 		case 2:
