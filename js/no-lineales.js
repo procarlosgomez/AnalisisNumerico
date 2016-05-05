@@ -19,7 +19,6 @@ function puntoFijo(ecuacion){
       resultado = math.eval(ecuacion, {x: x});
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
-      //excede el limite por exponencial
       //resultado = Math.pow((x+2),2);
       //incremental
 
