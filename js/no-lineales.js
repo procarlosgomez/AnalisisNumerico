@@ -33,8 +33,9 @@ function puntoFijo(ecuacion){
       if (Indefinido==("Infinity")) {
 				noty({
 					text:		"No es Convergente <br> Excede el limite por exponencial",
-					layout: "topRight",
-					type: 	"error"
+					layout: "centerRight",
+					type: 	"error",
+					timeout: 5000
 				})
 				//alert("No es Convergente");
 
@@ -47,8 +48,9 @@ function puntoFijo(ecuacion){
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
 								noty({
 									text:		"No es Convergente <br> Iguales",
-									layout: "topRight",
-									type: 	"error"
+									layout: "centerRight",
+									type: 	"error",
+									timeout: 5000
 								})
 							//alert("No es Convergente");
 							//console.log("No es Convergente, iguales");
@@ -60,8 +62,9 @@ function puntoFijo(ecuacion){
               vect[contador - 2] > vect[contador - 1]) {
 								noty({
 									text:		"No es Convergente <br> incremental",
-									layout: "topRight",
-									type: 	"error"
+									layout: "centerRight",
+									type: 	"error",
+									timeout: 5000
 								})
 								//alert("No es Convergente");
               //console.log("No es Convergente, incremental");
@@ -75,24 +78,25 @@ function puntoFijo(ecuacion){
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
   showInterplation($container, resultado, contador);
-}
-
-function showInterplation($contenedor, interpolacion, contador){
-	$contenedor.html("Interpolación: " + (interpolacion) + " Posición: " + (contador - 1));
 	//imprime el valor convergente y la interaccion
   //console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 	//$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
+function showInterplation($contenedor, interpolacion, contador){
+	$contenedor.html("Interpolación: " + (interpolacion) + " Posición: " + (contador - 1));
+}
+
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
-	$container = $('#resPuntoFijo .Interpola');
+	$container = $('#resNewtonRaphson .Interpola');
 	$container.empty();
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		noty({
 			text:		"La derivada de la funcion no debe ser igual a 0",
-			layout: "topRight",
-			type: 	"error"
+			layout: "centerRight",
+			type: 	"error",
+			timeout: 5000
 		})
 		//alert('La derivada de la funcion no debe ser igual a 0')
 		return;
@@ -105,12 +109,9 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 	var x = xIni;
   do {
       comparador = resultado;
-
       //Pn - (f(x)/f'(x));
       //succesfull
-
-			resultado = x - (math.eval(ecuacion+'/'+dEcuacion, {x: x}));
-
+			resultado = x - (math.eval('('+ecuacion+')'+'/'+'('+dEcuacion+')', {x: x}));
       //resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
       vect[contador] = resultado;
       x = resultado;
@@ -120,8 +121,9 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       if (Indefinido==("Infinity")) {
 				noty({
 					text:		"No es Convergente <br> Excede el limite por Exponencial",
-					layout: "topRight",
-					type: 	"error"
+					layout: "centerRight",
+					type: 	"error",
+					timeout: 5000
 				})
 				//alert("No es Convergente");
         //console.log("No es Convergente, excede el limite por exponencial");
@@ -131,16 +133,28 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       if (contador >= 7) {
           if (vect[contador - 1] == vect[contador - 3] & vect[contador - 1] == vect[contador - 5] &
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
-								alert("No es Convergente");
-                console.log("No es Convergente, iguales");
+								noty({
+									text:		"No es Convergente <br> Iguales",
+									layout: "centerRight",
+									type: 	"error",
+									timeout: 5000
+								})
+								//alert("No es Convergente");
+                //console.log("No es Convergente, iguales");
                 return;
           }
           //si es incremental cierra el ciclo
           if (vect[contador - 6] - vect[contador - 5] > (vect[contador - 5] - vect[contador - 4]) &
               vect[contador - 5] - vect[contador - 4] > (vect[contador - 4] - vect[contador - 3]) &
               vect[contador - 4] - vect[contador - 3] > (vect[contador - 3] - vect[contador - 2])) {
-								alert("No es Convergente");
-                console.log("No es Convergente, incremental");
+								noty({
+									text:		"No es Convergente <br> Incremental",
+									layout: "centerRight",
+									type: 	"error",
+									timeout: 5000
+								})
+								//alert("No es Convergente");
+                //console.log("No es Convergente, incremental");
                 return;
           }
       }
@@ -150,10 +164,12 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
   for (var i = 0; i < contador - 1; i++) {
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
+	showInterplation($container, resultado, contador);
   //imprime el valor convergente y la interaccion
-  //console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-	//$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-  showInterplation($container, resultado, contador);
+  console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+	//$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));s
+	$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+
 }
 
 $('#entradas a').on('click', function(e){
@@ -219,8 +235,9 @@ function drawPlot($contenedor, ecuaciones){
 		catch (err) {
 			noty({
 				text:		err,
-				layout: "topRight",
-				type: 	"error"
+				layout: "centerRight",
+				type: 	"error",
+				timeout: 5000
 			})
 
 	}
