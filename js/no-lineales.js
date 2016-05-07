@@ -164,12 +164,13 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
   for (var i = 0; i < contador - 1; i++) {
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
+
 	showInterplation($container, resultado, contador);
-  //imprime el valor convergente y la interaccion
+  /*//imprime el valor convergente y la interaccion
   console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 	//$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));s
 	$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-
+	*/
 }
 
 $('#entradas a').on('click', function(e){
