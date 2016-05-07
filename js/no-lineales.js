@@ -49,7 +49,8 @@ function puntoFijo(ecuacion){
 								noty({
 									text:		"No es Convergente <br> Iguales",
 									layout: "centerRight",
-									type: 	"error"
+									type: 	"error",
+									timeout: 5000
 								})
 							//alert("No es Convergente");
 							//console.log("No es Convergente, iguales");
@@ -62,7 +63,8 @@ function puntoFijo(ecuacion){
 								noty({
 									text:		"No es Convergente <br> incremental",
 									layout: "centerRight",
-									type: 	"error"
+									type: 	"error",
+									timeout: 5000
 								})
 								//alert("No es Convergente");
               //console.log("No es Convergente, incremental");
@@ -93,7 +95,8 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 		noty({
 			text:		"La derivada de la funcion no debe ser igual a 0",
 			layout: "centerRight",
-			type: 	"error"
+			type: 	"error",
+			timeout: 5000
 		})
 		//alert('La derivada de la funcion no debe ser igual a 0')
 		return;
@@ -122,7 +125,8 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 				noty({
 					text:		"No es Convergente <br> Excede el limite por Exponencial",
 					layout: "centerRight",
-					type: 	"error"
+					type: 	"error",
+					timeout: 5000
 				})
 				//alert("No es Convergente");
         //console.log("No es Convergente, excede el limite por exponencial");
@@ -135,7 +139,8 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 								noty({
 									text:		"No es Convergente <br> Iguales",
 									layout: "centerRight",
-									type: 	"error"
+									type: 	"error",
+									timeout: 5000
 								})
 								//alert("No es Convergente");
                 //console.log("No es Convergente, iguales");
@@ -148,7 +153,8 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 								noty({
 									text:		"No es Convergente <br> Incremental",
 									layout: "centerRight",
-									type: 	"error"
+									type: 	"error",
+									timeout: 5000
 								})
 								//alert("No es Convergente");
                 //console.log("No es Convergente, incremental");
@@ -222,7 +228,8 @@ function drawPlot($contenedor, ecuacion){
 			noty({
 				text:		err,
 				layout: "centerRight",
-				type: 	"error"
+				type: 	"error",
+				timeout: 5000
 			})
 
 	}
