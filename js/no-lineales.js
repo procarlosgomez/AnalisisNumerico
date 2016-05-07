@@ -131,16 +131,26 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       if (contador >= 7) {
           if (vect[contador - 1] == vect[contador - 3] & vect[contador - 1] == vect[contador - 5] &
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
-								alert("No es Convergente");
-                console.log("No es Convergente, iguales");
+								noty({
+									text:		"No es Convergente <br> Iguales",
+									layout: "topRight",
+									type: 	"error"
+								})
+								//alert("No es Convergente");
+                //console.log("No es Convergente, iguales");
                 return;
           }
           //si es incremental cierra el ciclo
           if (vect[contador - 6] - vect[contador - 5] > (vect[contador - 5] - vect[contador - 4]) &
               vect[contador - 5] - vect[contador - 4] > (vect[contador - 4] - vect[contador - 3]) &
               vect[contador - 4] - vect[contador - 3] > (vect[contador - 3] - vect[contador - 2])) {
-								alert("No es Convergente");
-                console.log("No es Convergente, incremental");
+								noty({
+									text:		"No es Convergente <br> Incremental",
+									layout: "topRight",
+									type: 	"error"
+								})
+								//alert("No es Convergente");
+                //console.log("No es Convergente, incremental");
                 return;
           }
       }
