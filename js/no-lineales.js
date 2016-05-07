@@ -33,8 +33,9 @@ function puntoFijo(ecuacion){
       if (Indefinido==("Infinity")) {
 				noty({
 					text:		"No es Convergente <br> Excede el limite por exponencial",
-					layout: "topRight",
-					type: 	"error"
+					layout: "CenterRight",
+					type: 	"error",
+					timeout: 5000
 				})
 				//alert("No es Convergente");
 
@@ -47,7 +48,7 @@ function puntoFijo(ecuacion){
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
 								noty({
 									text:		"No es Convergente <br> Iguales",
-									layout: "topRight",
+									layout: "CenterRight",
 									type: 	"error"
 								})
 							//alert("No es Convergente");
@@ -60,7 +61,7 @@ function puntoFijo(ecuacion){
               vect[contador - 2] > vect[contador - 1]) {
 								noty({
 									text:		"No es Convergente <br> incremental",
-									layout: "topRight",
+									layout: "CenterRight",
 									type: 	"error"
 								})
 								//alert("No es Convergente");
@@ -91,7 +92,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		noty({
 			text:		"La derivada de la funcion no debe ser igual a 0",
-			layout: "topRight",
+			layout: "CenterRight",
 			type: 	"error"
 		})
 		//alert('La derivada de la funcion no debe ser igual a 0')
@@ -120,7 +121,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       if (Indefinido==("Infinity")) {
 				noty({
 					text:		"No es Convergente <br> Excede el limite por Exponencial",
-					layout: "topRight",
+					layout: "CenterRight",
 					type: 	"error"
 				})
 				//alert("No es Convergente");
@@ -133,7 +134,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
 								noty({
 									text:		"No es Convergente <br> Iguales",
-									layout: "topRight",
+									layout: "CenterRight",
 									type: 	"error"
 								})
 								//alert("No es Convergente");
@@ -146,7 +147,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
               vect[contador - 4] - vect[contador - 3] > (vect[contador - 3] - vect[contador - 2])) {
 								noty({
 									text:		"No es Convergente <br> Incremental",
-									layout: "topRight",
+									layout: "CenterRight",
 									type: 	"error"
 								})
 								//alert("No es Convergente");
