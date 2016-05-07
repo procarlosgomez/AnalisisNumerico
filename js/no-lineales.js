@@ -14,7 +14,7 @@ function puntoFijo(ecuacion){
   do {
       comparador = resultado;
       //Convergente.
-      //resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
+	      //resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
       //Convergente
       resultado = math.eval(ecuacion, {x: x});
       //son iguales
@@ -29,6 +29,7 @@ function puntoFijo(ecuacion){
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
       if (Indefinido==("Infinity")) {
+				alert("No es Convergente");
         console.log("No es Convergente, excede el limite por exponencial");
         return;
       }
@@ -36,13 +37,15 @@ function puntoFijo(ecuacion){
       if (contador >= 7) {
           if (vect[contador - 1] == vect[contador - 3] & vect[contador - 1] == vect[contador - 5] &
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
-              console.log("No es Convergente, iguales");
+							alert("No es Convergente");
+							console.log("No es Convergente, iguales");
               return;
           }
           //si es incremental cierra el ciclo
           if (vect[contador - 6] > vect[contador - 5] & vect[contador - 5] > vect[contador - 4] &
               vect[contador - 4] > vect[contador - 3] & vect[contador - 3] > vect[contador - 2] &
               vect[contador - 2] > vect[contador - 1]) {
+								alert("No es Convergente");
               console.log("No es Convergente, incremental");
               return;
           }
@@ -84,6 +87,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
       if (Indefinido==("Infinity")) {
+				alert("No es Convergente");
         console.log("No es Convergente, excede el limite por exponencial");
         return;
       }
@@ -91,6 +95,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       if (contador >= 7) {
           if (vect[contador - 1] == vect[contador - 3] & vect[contador - 1] == vect[contador - 5] &
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
+								alert("No es Convergente");
                 console.log("No es Convergente, iguales");
                 return;
           }
@@ -98,6 +103,7 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
           if (vect[contador - 6] - vect[contador - 5] > (vect[contador - 5] - vect[contador - 4]) &
               vect[contador - 5] - vect[contador - 4] > (vect[contador - 4] - vect[contador - 3]) &
               vect[contador - 4] - vect[contador - 3] > (vect[contador - 3] - vect[contador - 2])) {
+								alert("No es Convergente");
                 console.log("No es Convergente, incremental");
                 return;
           }
