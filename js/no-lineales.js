@@ -5,6 +5,8 @@ $(document).ready(function(){
 })
 
 function puntoFijo(ecuacion){
+	$container = $('#resPuntoFijo .Interpola');
+	$container.empty();
   var x = 1;
   var resultado = 0;
   var comparador;
@@ -30,6 +32,7 @@ function puntoFijo(ecuacion){
       //Si la funcion tiene un error por superar el limite de caracteres
       if (Indefinido==("Infinity")) {
 				alert("No es Convergente");
+
         console.log("No es Convergente, excede el limite por exponencial");
         return;
       }
@@ -56,12 +59,20 @@ function puntoFijo(ecuacion){
   for (var i = 0; i < contador - 1; i++) {
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
-  //imprime el valor convergente y la interaccion
-  console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-	$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+  showInterplation($container, resultado, contador);
 }
 
+function showInterplation($contenedor, interpolacion, contador){
+	$contenedor.html("Interpolación: " + (interpolacion) + " Posición: " + (contador - 1));
+	//imprime el valor convergente y la interaccion
+  //console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+	//$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+}
+
+
 function newtonRaphson(ecuacion, dEcuacion, xIni){
+	$container = $('#resPuntoFijo .Interpola');
+	$container.empty();
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		alert('La derivada de la funcion no debe ser igual a 0')
 		return;
@@ -115,8 +126,9 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
   //imprime el valor convergente y la interaccion
-  console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-	$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+  //console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+	//$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+  showInterplation($container, resultado, contador);
 }
 
 $('#entradas a').on('click', function(e){
