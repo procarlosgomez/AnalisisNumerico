@@ -1,3 +1,4 @@
+
 <!DOCTYPE HTML>
 <html>
 	<head>
@@ -20,50 +21,52 @@
 				<div>VER EN GITHUB</div></a>
 			</div>
 
-			<div id="main-nolineal" class="table">
+			<div id="main-nolineal" class="Table">
 				<div class="table-row">
 					<form id="entradas" class="table-cell">
 
 						<a href="#" class="selected">Punto Fijo</a>
 						<a href="#">Newton Raphson</a>
-						<!-- <a href="#">Secante</a> -->
+						<a href="#">Secante</a>
 
 						<div class="datos selected">
 							<span></span><input type="text" placeholder="f(x)=" class="ecuacion"/><span class="equal">=X</span>
 						</div>
 						<div class="datos">
-							<span></span><input type="text" placeholder="f(x)=" class="ecuacion"/><span class="equal">=0</span>
-							<span></span><input type="text" placeholder="f '(x)=" class="dEcuacion"/><span class="equal">=0</span>
-							<span></span><input type="text" placeholder="Valor Inicial" class="xIni"/>
+						<span></span><input type="text" placeholder="f(x)=" class="ecuacion"/><span class="equal">=0</span>
+						<span></span><input type="text" placeholder="f '(x)=" class="dEcuacion"/><span class="equal">=0</span>
+						<span></span><input type="text" placeholder="Valor Inicial" class="xIni"/>
+
 						</div>
 						<div class="datos">
-							<span></span><input type="text" placeholder="f(x)=" class="ecuacion"/><span class="equal">=X</span>
+						<span></span><input type="text" placeholder="f(x)=" class="ecuacion"/><span class="equal">=X</span>
+
 						</div>
 						<button type="submit">Procesar</button>
 						<button type="button" id="Volver">Volver</button>
 					</form>
 					<div class="table-cell tabs-result">
 							<div id="resPuntoFijo" class="selected">
-								<div id="plotPuntoFijo"></div>
-								<div class="resData">
-									<div class="Interpola"></div>
-									<div class="table tablaErrores"></div>
-								</div>
+							<div id="plotPuntoFijo"></div>
+							<div class="resData">
+								<div class="Ecuacion"></div>
+								<div class="table tablaErrores"></div>
+							</div>
 						</div>
 						<div id="resNewtonRaphson">
 							<div id="plotNewtonRaphson"></div>
 							<div class="resData">
-								<div class="Interpola"></div>
-								<div class="table tabla-Errores"></div>
+								<div class="Ecuacion"></div>
+								<div class="table tablaErrores"></div>
 							</div>
 						</div>
-						<!-- <div id="resSecante">
+						<div id="resSecante">
 							<div id="plotSecante"></div>
 							<div class="resData">
 								<div class="Ecuacion"></div>
 								<div class="table tablaErrores"></div>
 							</div>
-						</div> -->
+						</div>
 					</div>
 				</div>
 			</div>
@@ -80,6 +83,7 @@
 			</div>
 		</div>
 		<script src="js/jquery.min.js"></script>
+		<script src="js/noty.js"></script>
 		<script src="js/math.js"></script>
 		<script src="js/d3.min.js"></script>
 		<script src="js/function-plot.js"></script>
