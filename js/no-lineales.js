@@ -78,18 +78,18 @@ function puntoFijo(ecuacion){
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
   showInterplation($container, resultado, contador);
-}
-
-function showInterplation($contenedor, interpolacion, contador){
-	$contenedor.html("Interpolación: " + (interpolacion) + " Posición: " + (contador - 1));
 	//imprime el valor convergente y la interaccion
   //console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 	//$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
+function showInterplation($contenedor, interpolacion, contador){
+	$contenedor.html("Interpolación: " + (interpolacion) + " Posición: " + (contador - 1));
+}
+
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
-	$container = $('#resPuntoFijo .Interpola');
+	$container = $('#resNewtonRaphson .Interpola');
 	$container.empty();
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
 		noty({
@@ -109,12 +109,9 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 	var x = xIni;
   do {
       comparador = resultado;
-
       //Pn - (f(x)/f'(x));
       //succesfull
-
-			resultado = x - (math.eval(ecuacion+'/'+dEcuacion, {x: x}));
-
+			resultado = x - (math.eval('('+ecuacion+')'+'/'+'('+dEcuacion+')', {x: x}));
       //resultado = Pn - ((Math.pow(Math.E, Pn-2)-Math.pow(Pn, 2)+7)/(Math.pow(Math.E, Pn-2)-(2*Pn)));
       vect[contador] = resultado;
       x = resultado;
@@ -167,10 +164,12 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
   for (var i = 0; i < contador - 1; i++) {
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
+	showInterplation($container, resultado, contador);
   //imprime el valor convergente y la interaccion
-  //console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-	//$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
-  showInterplation($container, resultado, contador);
+  console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+	//$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));s
+	$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+
 }
 
 $('#entradas a').on('click', function(e){
