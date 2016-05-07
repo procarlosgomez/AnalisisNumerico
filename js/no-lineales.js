@@ -55,6 +55,7 @@ function puntoFijo(ecuacion){
   }
   //imprime el valor convergente y la interaccion
   console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+	$('#resPuntoFijo .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
 function newtonRaphson(ecuacion, dEcuacion, xIni){
@@ -108,7 +109,8 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
     console.log("Posicion: " + (i + 1) + " Resultado: " + vect[i]);
   }
   //imprime el valor convergente y la interaccion
-  console.log("\nInterpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+  console.log("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
+	$('#resNewtonRaphson .Interpola').html("Interpolacion: " + (resultado) + "\nPosicion: " + (contador - 1));
 }
 
 $('#entradas a').on('click', function(e){
