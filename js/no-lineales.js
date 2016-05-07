@@ -31,25 +31,40 @@ function puntoFijo(ecuacion){
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
       if (Indefinido==("Infinity")) {
-				alert("No es Convergente");
+				noty({
+					text:		"No es Convergente <br> Excede el limite por exponencial",
+					layout: "topRight",
+					type: 	"error"
+				})
+				//alert("No es Convergente");
 
-        console.log("No es Convergente, excede el limite por exponencial");
+        //console.log("No es Convergente, excede el limite por exponencial");
         return;
       }
       //las interacciones de la fuincion son iguales eje [1,2,1,2,1,2,1,2]
       if (contador >= 7) {
           if (vect[contador - 1] == vect[contador - 3] & vect[contador - 1] == vect[contador - 5] &
               vect[contador - 2] == vect[contador - 4] & vect[contador - 2] == vect[contador - 6]) {
-							alert("No es Convergente");
-							console.log("No es Convergente, iguales");
+								noty({
+									text:		"No es Convergente <br> Iguales",
+									layout: "topRight",
+									type: 	"error"
+								})
+							//alert("No es Convergente");
+							//console.log("No es Convergente, iguales");
               return;
           }
           //si es incremental cierra el ciclo
           if (vect[contador - 6] > vect[contador - 5] & vect[contador - 5] > vect[contador - 4] &
               vect[contador - 4] > vect[contador - 3] & vect[contador - 3] > vect[contador - 2] &
               vect[contador - 2] > vect[contador - 1]) {
-								alert("No es Convergente");
-              console.log("No es Convergente, incremental");
+								noty({
+									text:		"No es Convergente <br> incremental",
+									layout: "topRight",
+									type: 	"error"
+								})
+								//alert("No es Convergente");
+              //console.log("No es Convergente, incremental");
               return;
           }
       }
@@ -74,7 +89,12 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
 	$container = $('#resPuntoFijo .Interpola');
 	$container.empty();
 	if(math.eval(dEcuacion, {x: xIni}) === 0){
-		alert('La derivada de la funcion no debe ser igual a 0')
+		noty({
+			text:		"La derivada de la funcion no debe ser igual a 0",
+			layout: "topRight",
+			type: 	"error"
+		})
+		//alert('La derivada de la funcion no debe ser igual a 0')
 		return;
 	}
 
@@ -98,8 +118,13 @@ function newtonRaphson(ecuacion, dEcuacion, xIni){
       var Indefinido = comparador;
       //Si la funcion tiene un error por superar el limite de caracteres
       if (Indefinido==("Infinity")) {
-				alert("No es Convergente");
-        console.log("No es Convergente, excede el limite por exponencial");
+				noty({
+					text:		"No es Convergente <br> Excede el limite por Exponencial",
+					layout: "topRight",
+					type: 	"error"
+				})
+				//alert("No es Convergente");
+        //console.log("No es Convergente, excede el limite por exponencial");
         return;
       }
       //las interacciones de la fuincion son iguales eje [1,2,1,2,1,2,1,2]
