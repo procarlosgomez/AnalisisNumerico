@@ -14,7 +14,8 @@ function puntoFijo(ecuacion){
   do {
       comparador = resultado;
       //Convergente.
-	      //resultado = Mape
+	      //resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
+      //Convergente
       resultado = math.eval(ecuacion, {x: x});
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
@@ -135,7 +136,6 @@ $('form').on('submit', function(e){
 
 	$contenedor.empty();
 
-
 	switch (fun) {
 		case 0:
 			puntoFijo(ecuacion);
@@ -171,8 +171,12 @@ function drawPlot($contenedor, ecuacion){
 		//instance.programmaticZoom(xDomain, yDomain)
 	}
 		catch (err) {
-		console.log(err);
-		alert(err);
+			noty({
+				text:		err,
+				layout: "topRight",
+				type: 	"error"
+			})
+
 	}
 
 }
