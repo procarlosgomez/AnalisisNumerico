@@ -123,23 +123,50 @@ $('form').on('submit', function(e){
 	e.preventDefault();
 	var fun = $('#entradas a.selected').index();
 
-	var data = $(this).find('.datos.selected .ecuacion').val();
+	var ecuacion = $(this).find('.datos.selected .ecuacion').val();
+	var $contenedor = $('.tabs-result .selected div').first();
 
 	switch (fun) {
 		case 0:
-			puntoFijo(data);
+			puntoFijo(ecuacion);
 			break;
 		case 1:
 			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
 			var xIni = parseFloat($(this).find('.datos.selected .xIni').val());
-			newtonRaphson(data, dEcuacion, xIni);
+			newtonRaphson(ecuacion, dEcuacion, xIni);
 			break;
 		case 2:
 			break;
 	}
 
-	//((x+3)/(x^2+2))^1/2
-
+	drawPlot($contenedor, ecuacion);
 });
+
+function drawPlot($contenedor, ecuacion){
+	dataPlot = [{
+			fn: 				ecuacion,
+			sampler:		'builtIn',
+			graphType:	'polyline'
+		}
+	];
+
+	console.log('#'+$contenedor.attr('id'));
+
+	try {
+		var instance = functionPlot({
+			target: '#'+$contenedor.attr('id'),
+			data: dataPlot
+		});
+
+		//var xDomain = [min.x-1, max.x+1]
+		//var yDomain = [min.y-1, max.y+1]
+		//instance.programmaticZoom(xDomain, yDomain)
+	}
+		catch (err) {
+		console.log(err);
+		alert(err);
+	}
+
+}
 /*puntoFijo();
 newtonRaphson();*/
