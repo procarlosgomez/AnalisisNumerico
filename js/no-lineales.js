@@ -175,27 +175,36 @@ $('form').on('submit', function(e){
 
 	switch (fun) {
 		case 0:
-			puntoFijo(ecuacion);
+			try{
+				puntoFijo(ecuacion);
+				drawPlot($contenedor, [ecuacion]);
+			}catch(err){
+				alert('Sintaxis incorrecta')
+			}
 			break;
 		case 1:
 			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
 			var xIni = parseFloat($(this).find('.datos.selected .xIni').val());
 			newtonRaphson(ecuacion, dEcuacion, xIni);
+			drawPlot($contenedor, [ecuacion, dEcuacion]);
 			break;
 		case 2:
 			break;
 	}
 
-	drawPlot($contenedor, ecuacion);
+
 });
 
-function drawPlot($contenedor, ecuacion){
-	dataPlot = [{
-			fn: 				ecuacion,
+function drawPlot($contenedor, ecuaciones){
+	dataPlot = [];
+
+	for(var e in ecuaciones){
+		dataPlot.push({
+			fn: 				ecuaciones[e],
 			sampler:		'builtIn',
 			graphType:	'polyline'
-		}
-	];
+		})
+	}
 
 	try {
 		var instance = functionPlot({
