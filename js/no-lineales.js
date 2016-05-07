@@ -183,8 +183,12 @@ function drawPlot($contenedor, ecuacion){
 		//instance.programmaticZoom(xDomain, yDomain)
 	}
 		catch (err) {
-		console.log(err);
-		alert(err);
+			noty({
+				text:		err,
+				layout: "topRight",
+				type: 	"error"
+			})
+
 	}
 
 }
