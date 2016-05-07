@@ -202,8 +202,18 @@ $('form').on('submit', function(e){
 		case 1:
 			var dEcuacion = $(this).find('.datos.selected .dEcuacion').val();
 			var xIni = parseFloat($(this).find('.datos.selected .xIni').val());
-			newtonRaphson(ecuacion, dEcuacion, xIni);
-			drawPlot($contenedor, [ecuacion, dEcuacion]);
+			try{
+				newtonRaphson(ecuacion, dEcuacion, xIni);
+				drawPlot($contenedor, [ecuacion, dEcuacion]);
+			}catch(err){
+				noty({
+					text:		"Sintaxis incorrecta",
+					layout: "centerRight",
+					type: 	"error",
+					timeout: 5000
+				})
+				//alert('Sintaxis incorrecta')
+			}
 			break;
 		case 2:
 			break;
