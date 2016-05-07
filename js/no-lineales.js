@@ -126,6 +126,8 @@ $('form').on('submit', function(e){
 	var ecuacion = $(this).find('.datos.selected .ecuacion').val();
 	var $contenedor = $('.tabs-result .selected div').first();
 
+	$contenedor.empty();
+
 	switch (fun) {
 		case 0:
 			puntoFijo(ecuacion);
@@ -149,8 +151,6 @@ function drawPlot($contenedor, ecuacion){
 			graphType:	'polyline'
 		}
 	];
-
-	console.log('#'+$contenedor.attr('id'));
 
 	try {
 		var instance = functionPlot({
