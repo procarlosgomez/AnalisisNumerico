@@ -14,8 +14,7 @@ function puntoFijo(ecuacion){
   do {
       comparador = resultado;
       //Convergente.
-	      //resultado = Math.pow((x + 3) / ((Math.pow(x, 2)) + 2), 0.5);
-      //Convergente
+	      //resultado = Mape
       resultado = math.eval(ecuacion, {x: x});
       //son iguales
       //resultado = Math.pow(((x+3-(Math.pow(x,4)))/2),0.5);
@@ -135,6 +134,7 @@ $('form').on('submit', function(e){
 	var $contenedor = $('.tabs-result .selected div').first();
 
 	$contenedor.empty();
+
 
 	switch (fun) {
 		case 0:
